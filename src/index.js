@@ -1,12 +1,25 @@
 import React from "react";
-import { ApplicationProvider, Layout, Text } from "@ui-kitten/components";
+import {
+  ApplicationProvider,
+  Layout,
+  Text,
+  IconRegistry
+} from "@ui-kitten/components";
 import * as eva from "@eva-design/eva";
+import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import Routes from "~/routes";
+import { StoreProvider } from "easy-peasy";
+import { store } from "./model";
 
 export default () => (
-  <ApplicationProvider {...eva} theme={eva.light}>
-    <Layout style={{ flex: 1 }}>
-      <Routes />
-    </Layout>
-  </ApplicationProvider>
+  <>
+    <IconRegistry icons={EvaIconsPack} />
+    <ApplicationProvider {...eva} theme={eva.dark}>
+      <StoreProvider store={store}>
+        <Layout style={{ flex: 1 }}>
+          <Routes />
+        </Layout>
+      </StoreProvider>
+    </ApplicationProvider>
+  </>
 );
