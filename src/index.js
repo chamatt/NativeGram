@@ -14,7 +14,7 @@ import { store } from "./model";
 export default () => (
   <>
     <IconRegistry icons={EvaIconsPack} />
-    <ApplicationProvider {...eva} theme={eva.dark}>
+    <ApplicationProvider {...eva} theme={eva.light}>
       <StoreProvider store={store}>
         <Layout style={{ flex: 1 }}>
           <Routes />
