@@ -58,6 +58,7 @@ const FETCH_POST = gql`
     }
     user(id: $userId) {
       profile {
+        id
         avatar {
           url
         }
@@ -72,36 +73,16 @@ const Post = ({ userId, postId }) => {
   const route = useRoute();
   const carouselRef = useRef();
   const {
-    data: hasLiked,
-    loading: hasLikedLoading,
-    error: hasLikedError,
-  } = useQuery(HAS_LIKED, {
-    variables: {
-      postId,
-      userId,
-    },
-  });
-  const userHasLiked = hasLiked?.likesConnection?.aggregate?.count > 0;
-
-  const { data: postData, loading: postLoading, error: postError } = useQuery(
-    FETCH_POST,
-    {
-      variables: {
-        postId,
-        userId,
-      },
-    }
-  );
-
-  const [createLike, { data }] = useMutation(CREATE_LIKE, {
-    onCompleted: () => {
-      console.warn("created like");
-    },
-  });
-
-  const likes = postData?.likesConnection?.aggregate?.count;
-  const post = postData?.post;
-  const user = postData?.user;
+    post,
+    user,
+    likes,
+    userHasLiked,
+    postLoading,
+    hasLikedLoading,
+    postError,
+    hasLikedError,
+    createLike,
+  } = usePost(userId, postId);
 
   if (postLoading || hasLikedLoading) return <LoadingPage />;
   return (
@@ -148,6 +129,38 @@ const Post = ({ userId, postId }) => {
 };
 
 function usePost(userId, postId) {
+  const {
+    data: hasLiked,
+    loading: hasLikedLoading,
+    error: hasLikedError,
+  } = useQuery(HAS_LIKED, {
+    variables: {
+      postId,
+      userId,
+    },
+  });
+  const userHasLiked = hasLiked?.likesConnection?.aggregate?.count > 0;
+
+  const { data: postData, loading: postLoading, error: postError } = useQuery(
+    FETCH_POST,
+    {
+      variables: {
+        postId,
+        userId,
+      },
+    }
+  );
+
+  const [createLike, { data }] = useMutation(CREATE_LIKE, {
+    onCompleted: () => {
+      console.warn("created like");
+    },
+  });
+
+  const likes = postData?.likesConnection?.aggregate?.count;
+  const post = postData?.post;
+  const user = postData?.user;
+
   return {
     post,
     user,
