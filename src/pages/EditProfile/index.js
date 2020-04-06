@@ -23,6 +23,7 @@ const UPDATE_PROFILE = gql`
       }
     ) {
       profile {
+        id
         bio
         birthdate
         name
@@ -53,7 +54,7 @@ const FETCH_PROFILE = gql`
 `;
 
 const useMyProfile = () => {
-  const me = useStoreState((state) => state.auth.user._id);
+  const me = useStoreState((state) => state?.auth?.user?._id);
   const navigation = useNavigation();
   const route = useRoute();
   const {

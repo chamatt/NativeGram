@@ -15,8 +15,17 @@ import client from "~/graphql";
 import { ApolloProvider } from "@apollo/react-hooks";
 import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider } from "styled-components";
+import { useEvaTheme, ThemeContextProvider } from "~/context/ThemeContext";
 
 const App = () => {
+  // const [theme, setTheme] = React.useState("light");
+  // const currentTheme = themes[theme];
+
+  // const toggleTheme = () => {
+  //   const nextTheme = theme === "light" ? "dark" : "light";
+  //   setTheme(nextTheme);
+  // };
+
   const theme = useTheme();
   return (
     <ThemeProvider theme={theme}>
@@ -33,11 +42,22 @@ const App = () => {
   );
 };
 
-export default () => (
-  <>
-    <IconRegistry icons={EvaIconsPack} />
-    <ApplicationProvider {...eva} theme={eva.light}>
-      <App />
-    </ApplicationProvider>
-  </>
-);
+const AppProvider = () => {
+  const { currentTheme, toggleThemeType } = useEvaTheme();
+  return (
+    <>
+      <IconRegistry icons={EvaIconsPack} />
+      <ApplicationProvider {...eva} theme={currentTheme}>
+        <App />
+      </ApplicationProvider>
+    </>
+  );
+};
+
+export default () => {
+  return (
+    <ThemeContextProvider>
+      <AppProvider />
+    </ThemeContextProvider>
+  );
+};

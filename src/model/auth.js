@@ -6,7 +6,7 @@ const INITIAL_STATE = {
   user: null,
   token: null,
   signed: false,
-  loading: false
+  loading: false,
 };
 
 export default {
@@ -22,7 +22,7 @@ export default {
 
       const response = await api.post("auth/local", {
         identifier: email,
-        password
+        password,
       });
 
       const { jwt, user } = response.data;
@@ -55,7 +55,7 @@ export default {
       const response = await api.post("auth/local/register", {
         username,
         email,
-        password
+        password,
       });
 
       actions.signInRequest({ email, password });
@@ -71,14 +71,13 @@ export default {
     }
   }),
   signOut: thunk(async (actions, payload, { getState }) => {
-    // await AsyncStorage.removeItem("@nativegram/token");
+    await AsyncStorage.removeItem("@nativegram/token");
     actions.signOutSuccess();
-    console.log(getState());
   }),
-  signOutSuccess: action(state => {
+  signOutSuccess: action((state) => {
     state.user = null;
     state.token = null;
     state.signed = false;
     state.loading = false;
-  })
+  }),
 };

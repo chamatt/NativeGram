@@ -63,7 +63,7 @@ const FETCH_POSTS = gql`
 `;
 
 const Profile = () => {
-  const me = useStoreState((state) => state.auth.user._id);
+  const me = useStoreState((state) => state?.auth?.user?._id);
   const auth = useStoreState((state) => state.auth);
   const navigation = useNavigation();
   const route = useRoute();
@@ -81,9 +81,6 @@ const Profile = () => {
       variables: { id: route?.params?.userId || me },
     }
   );
-  console.warn(route?.params?.userId || me);
-  console.warn(profileError);
-
   function renderHeader() {
     return (
       <Header>

@@ -5,6 +5,7 @@ import { Image, Dimensions, ScrollView } from "react-native";
 import { Container, Body } from "./styles";
 import PostItem from "~/components/PostItem";
 import { LoadingPage } from "~/components/LoadingIndicator";
+import { Layout } from "@ui-kitten/components";
 
 const Post = () => {
   const route = useRoute();
@@ -14,11 +15,13 @@ const Post = () => {
   const { params: { postId = null, userId = null } = null } = route;
 
   return (
-    <ScrollView>
-      <Container>
-        <PostItem userId={userId} postId={postId} />
-      </Container>
-    </ScrollView>
+    <Layout level="3">
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Container>
+          <PostItem userId={userId} postId={postId} />
+        </Container>
+      </ScrollView>
+    </Layout>
   );
 };
 
