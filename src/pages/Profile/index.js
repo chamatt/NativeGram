@@ -25,9 +25,10 @@ import {
 } from "react-native-responsive-screen";
 
 const FETCH_PROFILE = gql`
-  query getProfile($id: ID!) {
+  query fetchProfile($id: ID!) {
     user(id: $id) {
       profile {
+        id
         bio
         name
         avatar {
@@ -45,7 +46,7 @@ const FETCH_PROFILE = gql`
 `;
 
 const FETCH_POSTS = gql`
-  query getPosts($id: ID!) {
+  query fetchPosts($id: ID!) {
     user(id: $id) {
       posts {
         id
@@ -63,12 +64,14 @@ const FETCH_POSTS = gql`
 
 const Profile = () => {
   const me = useStoreState((state) => state.auth.user._id);
+  const auth = useStoreState((state) => state.auth);
   const navigation = useNavigation();
   const route = useRoute();
   const {
     data: profile,
     loading: profileLoading,
     error: profileError,
+    refetch: profileRefetch,
   } = useQuery(FETCH_PROFILE, {
     variables: { id: route?.params?.userId || me },
   });
@@ -78,6 +81,8 @@ const Profile = () => {
       variables: { id: route?.params?.userId || me },
     }
   );
+  console.warn(route?.params?.userId || me);
+  console.warn(profileError);
 
   function renderHeader() {
     return (
@@ -110,6 +115,8 @@ const Profile = () => {
         <Body>
           <FlatList
             ListHeaderComponent={renderHeader}
+            onRefresh={() => profileRefetch()}
+            refreshing={profileLoading || postsLoading}
             data={posts?.user?.posts}
             keyExtractor={(item) => item.id}
             renderItem={({ item: { images, id, user } }) => (

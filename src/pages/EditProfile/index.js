@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Layout, Input, Button, Icon } from "@ui-kitten/components";
 
 import { UserAvatar } from "./styles";
@@ -10,9 +10,17 @@ import SizedBox from "~/components/SizedBox";
 import LoadingIndicator from "~/components/LoadingIndicator";
 
 const UPDATE_PROFILE = gql`
-  mutation updateProfile($name: String, $bio: String, $birthdate: Date) {
+  mutation updateProfile(
+    $profileId: ID!
+    $name: String
+    $bio: String
+    $birthdate: Date
+  ) {
     updateProfile(
-      input: { data: { bio: $bio, name: $name, birthdate: $birthdate } }
+      input: {
+        data: { bio: $bio, name: $name, birthdate: $birthdate }
+        where: { id: $profileId }
+      }
     ) {
       profile {
         bio
@@ -24,9 +32,10 @@ const UPDATE_PROFILE = gql`
 `;
 
 const FETCH_PROFILE = gql`
-  query getProfile($id: ID!) {
+  query fetchProfile($id: ID!) {
     user(id: $id) {
       profile {
+        id
         bio
         name
         avatar {
@@ -62,7 +71,13 @@ const useMyProfile = () => {
       loading: updateProfileLoading,
       error: updateProfileError,
     },
-  ] = useMutation(UPDATE_PROFILE);
+  ] = useMutation(UPDATE_PROFILE, {
+    awaitRefetchQueries: true,
+    refetchQueries: () => ["fetchProfile"],
+    onCompleted: () => {
+      navigation.pop();
+    },
+  });
 
   useEffect(() => {
     if (updateProfileError) alert(updateProfileError);
@@ -90,6 +105,20 @@ export default function EditProfile() {
     updateProfileData,
   } = useMyProfile();
   const navigation = useNavigation();
+  const route = useRoute();
+  const [name, setName] = useState();
+  const [bio, setBio] = useState();
+
+  const handleEditProfile = useCallback(() => {
+    updateProfile({
+      variables: {
+        profileId: profile?.user?.profile?.id,
+        name,
+        bio,
+      },
+    });
+  }, [profile, name, bio]);
+
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -107,21 +136,11 @@ export default function EditProfile() {
               <LoadingIndicator {...style}></LoadingIndicator>
             )
           }
-          onPress={() =>
-            updateProfile({
-              variables: {
-                name,
-                bio,
-              },
-            })
-          }
+          onPress={handleEditProfile}
         ></Button>
       ),
     });
-  }, [updateProfileLoading]);
-
-  const [name, setName] = useState();
-  const [bio, setBio] = useState();
+  }, [updateProfileLoading, profile, name, bio]);
 
   useEffect(() => {
     setName(profile?.user?.profile?.name);
