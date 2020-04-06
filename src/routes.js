@@ -149,12 +149,17 @@ const PostStack = () => {
 };
 
 const Routes = () => {
-  // const theme = useTheme();
+  const theme = useTheme();
   const isAuthenticated = useStoreState((state) => state.auth.signed);
 
   return (
     <NavigationContainer>
-      <Root.Navigator>
+      <Root.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: theme["background-basic-color-1"] },
+          headerTintColor: theme["text-basic-color"],
+        }}
+      >
         {!isAuthenticated ? (
           <Root.Screen
             name="Auth"
@@ -169,12 +174,7 @@ const Routes = () => {
               name="Main"
               component={TabNavigator}
             />
-            <BottomTab.Screen
-              name="Settings"
-              // headerMode=""
-              component={SettingsScreen}
-              // options={{ headerSho }}
-            />
+            <Root.Screen name="Settings" component={SettingsScreen} />
           </>
         )}
       </Root.Navigator>
