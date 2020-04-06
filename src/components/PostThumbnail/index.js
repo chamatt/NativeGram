@@ -13,9 +13,7 @@ export default function PostThumbnail({
   const navigation = useNavigation();
   return (
     <Container
-      onPress={() =>
-        navigation.navigate("Post", { postId: id, userId: userId })
-      }
+      onPress={() => navigation.push("Post", { postId: id, userId: userId })}
       {...rest}
     >
       <Thumbnail source={{ uri: image }}></Thumbnail>

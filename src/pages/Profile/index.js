@@ -6,6 +6,7 @@ import {
   Avatar,
   Spinner,
   Drawer,
+  Icon,
 } from "@ui-kitten/components";
 import { useStoreActions, useStoreState } from "easy-peasy";
 import { gql } from "apollo-boost";
@@ -23,6 +24,8 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+
+const SettingsIcon = (style) => <Icon {...style} name="settings" />;
 
 const FETCH_PROFILE = gql`
   query fetchProfile($id: ID!) {
@@ -75,10 +78,12 @@ const Profile = () => {
   } = useQuery(FETCH_PROFILE, {
     variables: { id: route?.params?.userId || me },
   });
+  const userId = route?.params?.userId;
+
   const { data: posts, loading: postsLoading, error: postsError } = useQuery(
     FETCH_POSTS,
     {
-      variables: { id: route?.params?.userId || me },
+      variables: { id: userId || me },
     }
   );
   function renderHeader() {
@@ -92,7 +97,7 @@ const Profile = () => {
         <Text category="h5">{profile?.user?.profile?.name}</Text>
         <Text category="p1">{profile?.user?.profile?.bio}</Text>
         <SizedBox height={20}></SizedBox>
-        {!route?.params?.userId && (
+        {(!userId || userId === me) && (
           <EditButton onPress={() => navigation.navigate("EditProfile")}>
             Edit
           </EditButton>
@@ -104,6 +109,21 @@ const Profile = () => {
       </Header>
     );
   }
+
+  useEffect(() => {
+    if (!userId || userId === me) {
+      navigation.setOptions({
+        headerRight: () => (
+          <Button
+            appearance="ghost"
+            status="basic"
+            onPress={() => navigation.navigate("Settings")}
+            icon={SettingsIcon}
+          ></Button>
+        ),
+      });
+    }
+  }, [userId]);
 
   if (profileLoading) return <LoadingPage />;
   return (

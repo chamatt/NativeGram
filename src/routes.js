@@ -35,7 +35,6 @@ const HomeIcon = (style) => <Icon {...style} name="home" />;
 const CameraIcon = (style) => (
   <Icon {...style} style={{ width: 50 }} size={20} name="camera-outline" />
 );
-const SettingsIcon = (style) => <Icon {...style} name="settings" />;
 
 const BottomTabBar = ({ navigation, state }) => {
   const onSelect = (index) => {
@@ -103,20 +102,7 @@ const ProfileStack = () => {
         headerTintColor: theme["text-basic-color"],
       }}
     >
-      <Profile.Screen
-        options={{
-          headerRight: () => (
-            <Button
-              appearance="ghost"
-              status="basic"
-              onPress={() => navigation.navigate("Settings")}
-              icon={SettingsIcon}
-            ></Button>
-          ),
-        }}
-        name="Profile"
-        component={ProfileScreen}
-      ></Profile.Screen>
+      <Profile.Screen name="Profile" component={ProfileScreen}></Profile.Screen>
       <Profile.Screen
         name="EditProfile"
         options={{ title: "Edit Profile" }}

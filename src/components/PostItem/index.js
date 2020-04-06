@@ -3,7 +3,7 @@ import { Layout, Text, Avatar, Button } from "@ui-kitten/components";
 import { useStoreActions, useStoreState } from "easy-peasy";
 import { gql } from "apollo-boost";
 import { useQuery, useMutation } from "@apollo/react-hooks";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import Carousel from "react-native-snap-carousel";
 import { Image, Dimensions } from "react-native";
 import { LoadingPage } from "~/components/LoadingIndicator";
@@ -71,6 +71,7 @@ const WIDTH = Dimensions.get("screen").width;
 
 const Post = ({ userId, postId }) => {
   const route = useRoute();
+  const navigation = useNavigation();
   const carouselRef = useRef();
   const {
     post,
@@ -87,7 +88,13 @@ const Post = ({ userId, postId }) => {
   if (postLoading || hasLikedLoading) return <LoadingPage />;
   return (
     <Container>
-      <Header>
+      <Header
+        onPress={() =>
+          navigation.push("Profile", {
+            userId,
+          })
+        }
+      >
         <Avatar source={{ uri: user?.profile?.avatar?.url }}></Avatar>
         <SizedBox width={10} />
         <Text category="s1">{user?.profile?.name || user?.username}</Text>
