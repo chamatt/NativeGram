@@ -72,59 +72,6 @@ const Post = ({ userId, postId }) => {
   const route = useRoute();
   const carouselRef = useRef();
   const {
-    post,
-    user,
-    likes,
-    userHasLiked,
-    postLoading,
-    hasLikedLoading,
-    postError,
-    hasLikedError,
-    createLike,
-  } = usePost(userId, postId);
-
-  if (postLoading || hasLikedLoading) return <LoadingPage />;
-  return (
-    <Container>
-      <Header>
-        <Avatar source={{ uri: user?.profile?.avatar?.url }}></Avatar>
-        <SizedBox width={10} />
-        <Text category="s1">{user?.profile?.name || user?.username}</Text>
-      </Header>
-      <CarouselContainer>
-        <Carousel
-          ref={carouselRef}
-          data={post?.images}
-          layout="default"
-          renderItem={({ item }) => {
-            return <PostImage source={{ uri: item?.url }} resizeMode="cover" />;
-          }}
-          sliderWidth={wp("85%")}
-          itemWidth={wp("85%")}
-        />
-      </CarouselContainer>
-      <PostActions>
-        <PostAction
-          type="like"
-          amount={likes}
-          active={userHasLiked}
-          onPress={() => createLike({ variables: { userId, postId } })}
-        />
-        <PostAction type="comment" onPress={() => alert("Comment")} />
-      </PostActions>
-      <Body>
-        <Text>{post?.description}</Text>
-        <SizedBox height={20} />
-        <Button size="small" appearance="outline">
-          Show Comments
-        </Button>
-      </Body>
-    </Container>
-  );
-};
-
-function usePost(userId, postId) {
-  const {
     data: hasLiked,
     loading: hasLikedLoading,
     error: hasLikedError,
@@ -156,6 +103,51 @@ function usePost(userId, postId) {
   const post = postData?.post;
   const user = postData?.user;
 
+  if (postLoading || hasLikedLoading) return <LoadingPage />;
+  return (
+    <Container>
+      <Header>
+        <Avatar source={{ uri: user?.profile?.avatar?.url }}></Avatar>
+        <SizedBox width={10} />
+        <Text category="s1">{user?.profile?.name || user?.username}</Text>
+      </Header>
+      {post?.images && (
+        <CarouselContainer>
+          <Carousel
+            ref={carouselRef}
+            data={post?.images}
+            layout="default"
+            renderItem={({ item }) => {
+              return (
+                <PostImage source={{ uri: item?.url }} resizeMode="cover" />
+              );
+            }}
+            sliderWidth={wp("85%")}
+            itemWidth={wp("85%")}
+          />
+        </CarouselContainer>
+      )}
+      <PostActions>
+        <PostAction
+          type="like"
+          amount={likes}
+          active={userHasLiked}
+          onPress={() => createLike({ variables: { userId, postId } })}
+        />
+        <PostAction type="comment" onPress={() => alert("Comment")} />
+      </PostActions>
+      <Body>
+        <Text>{post?.description}</Text>
+        <SizedBox height={20} />
+        <Button size="small" appearance="outline">
+          Show Comments
+        </Button>
+      </Body>
+    </Container>
+  );
+};
+
+function usePost(userId, postId) {
   return {
     post,
     user,

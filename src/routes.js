@@ -156,7 +156,11 @@ const Routes = () => {
     <NavigationContainer>
       <Root.Navigator>
         {!isAuthenticated ? (
-          <Root.Screen name="Auth" component={AuthStack} />
+          <Root.Screen
+            name="Auth"
+            options={{ headerShown: false }}
+            component={AuthStack}
+          />
         ) : (
           <>
             <Root.Screen
