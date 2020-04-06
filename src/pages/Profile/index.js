@@ -53,13 +53,15 @@ const FETCH_POSTS = gql`
           id
           url
         }
+        user {
+          id
+        }
       }
     }
   }
 `;
 
 const Profile = () => {
-  const signOut = useStoreActions((actions) => actions.auth.signOut);
   const me = useStoreState((state) => state.auth.user._id);
   const route = useRoute();
   const {
@@ -100,16 +102,17 @@ const Profile = () => {
   return (
     <Container>
       <SafeAreaView>
-        {/* <Button onPress={() => signOut()} status="danger">
-            LOGOUT
-          </Button> */}
         <Body>
           <FlatList
             ListHeaderComponent={renderHeader}
             data={posts?.user?.posts}
             keyExtractor={(item) => item.id}
-            renderItem={({ item: { images } }) => (
-              <PostThumbnail image={images?.[0]?.url} />
+            renderItem={({ item: { images, id, user } }) => (
+              <PostThumbnail
+                id={id}
+                userId={user?.id}
+                image={images?.[0]?.url}
+              />
             )}
             numColumns={2}
           ></FlatList>

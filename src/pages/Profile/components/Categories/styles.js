@@ -17,7 +17,8 @@ export const CategoryContainer = styled(Layout)`
 export const CategoryItem = styled(Layout)`
   align-items: center;
   justify-content: center;
-  padding: 20px 10px;
+  padding: 0px 10px;
+  padding-top: 20px
   width: ${wp("25%")}px;
 `;
 
