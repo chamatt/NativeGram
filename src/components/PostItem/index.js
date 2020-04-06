@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { Layout, Text, Avatar, Button } from "@ui-kitten/components";
 import { useStoreActions, useStoreState } from "easy-peasy";
 import { gql } from "apollo-boost";
-import { useQuery } from "@apollo/react-hooks";
+import { useQuery, useMutation } from "@apollo/react-hooks";
 import { useRoute } from "@react-navigation/native";
 import Carousel from "react-native-snap-carousel";
 import { Image, Dimensions } from "react-native";
@@ -21,6 +21,16 @@ import {
 } from "react-native-responsive-screen";
 import PostAction from "../PostAction";
 import SizedBox from "../SizedBox";
+
+const CREATE_LIKE = gql`
+  mutation createLike($userId: ID!, $postId: ID!) {
+    createLike(input: { data: { user: $userId, post: $postId } }) {
+      like {
+        id
+      }
+    }
+  }
+`;
 
 const HAS_LIKED = gql`
   query isLiked($userId: ID!, $postId: ID!) {
@@ -48,6 +58,7 @@ const FETCH_POST = gql`
     }
     user(id: $userId) {
       profile {
+        id
         avatar {
           url
         }
@@ -70,6 +81,7 @@ const Post = ({ userId, postId }) => {
     hasLikedLoading,
     postError,
     hasLikedError,
+    createLike,
   } = usePost(userId, postId);
 
   if (postLoading || hasLikedLoading) return <LoadingPage />;
@@ -80,24 +92,28 @@ const Post = ({ userId, postId }) => {
         <SizedBox width={10} />
         <Text category="s1">{user?.profile?.name || user?.username}</Text>
       </Header>
-      <CarouselContainer>
-        <Carousel
-          ref={carouselRef}
-          data={post?.images}
-          layout="default"
-          renderItem={({ item }) => {
-            return <PostImage source={{ uri: item?.url }} resizeMode="cover" />;
-          }}
-          sliderWidth={wp("85%")}
-          itemWidth={wp("85%")}
-        />
-      </CarouselContainer>
+      {post?.images && (
+        <CarouselContainer>
+          <Carousel
+            ref={carouselRef}
+            data={post?.images}
+            layout="default"
+            renderItem={({ item }) => {
+              return (
+                <PostImage source={{ uri: item?.url }} resizeMode="cover" />
+              );
+            }}
+            sliderWidth={wp("85%")}
+            itemWidth={wp("85%")}
+          />
+        </CarouselContainer>
+      )}
       <PostActions>
         <PostAction
           type="like"
           amount={likes}
           active={userHasLiked}
-          onPress={() => alert("Like")}
+          onPress={() => createLike({ variables: { userId, postId } })}
         />
         <PostAction type="comment" onPress={() => alert("Comment")} />
       </PostActions>
@@ -134,6 +150,13 @@ function usePost(userId, postId) {
       },
     }
   );
+
+  const [createLike, { data }] = useMutation(CREATE_LIKE, {
+    onCompleted: () => {
+      console.warn("created like");
+    },
+  });
+
   const likes = postData?.likesConnection?.aggregate?.count;
   const post = postData?.post;
   const user = postData?.user;
@@ -147,6 +170,7 @@ function usePost(userId, postId) {
     hasLikedLoading,
     postError,
     hasLikedError,
+    createLike,
   };
 }
 
