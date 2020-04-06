@@ -22,6 +22,7 @@ import PostScreen from "~/pages/Post";
 import SettingsScreen from "~/pages/Settings";
 import { BottomSafeArea } from "~/components/SafeArea";
 import { useStoreState } from "easy-peasy";
+import EditProfile from "./pages/EditProfile";
 
 const BottomTab = createBottomTabNavigator();
 const Auth = createStackNavigator();
@@ -115,6 +116,11 @@ const ProfileStack = () => {
         }}
         name="Profile"
         component={ProfileScreen}
+      ></Profile.Screen>
+      <Profile.Screen
+        name="EditProfile"
+        options={{ title: "Edit Profile" }}
+        component={EditProfile}
       ></Profile.Screen>
       {PostStack()}
     </Profile.Navigator>

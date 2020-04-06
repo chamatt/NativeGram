@@ -10,7 +10,7 @@ import {
 import { useStoreActions, useStoreState } from "easy-peasy";
 import { gql } from "apollo-boost";
 import { useQuery } from "@apollo/react-hooks";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 
 import { Container, Header, Body, EditButton, UserAvatar } from "./styles";
 import { SafeAreaView, TopSafeArea } from "~/components/SafeArea";
@@ -63,6 +63,7 @@ const FETCH_POSTS = gql`
 
 const Profile = () => {
   const me = useStoreState((state) => state.auth.user._id);
+  const navigation = useNavigation();
   const route = useRoute();
   const {
     data: profile,
@@ -89,7 +90,11 @@ const Profile = () => {
         <Text category="h5">{profile?.user?.profile?.name}</Text>
         <Text category="p1">{profile?.user?.profile?.bio}</Text>
         <SizedBox height={20}></SizedBox>
-        {!route?.params?.userId && <EditButton>Edit</EditButton>}
+        {!route?.params?.userId && (
+          <EditButton onPress={() => navigation.navigate("EditProfile")}>
+            Edit
+          </EditButton>
+        )}
         <Categories
           posts={profile?.user?.posts?.length}
           followers={profile?.user?.Followers?.length}
