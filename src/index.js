@@ -29,25 +29,20 @@ const App = () => {
   const theme = useTheme();
   return (
     <ThemeProvider theme={theme}>
-      <ApolloProvider client={client}>
-        <StoreProvider store={store}>
-          <PersistGate loading={null} persistor={persistor}>
-            <Layout style={{ flex: 1 }}>
-              <Routes />
-            </Layout>
-          </PersistGate>
-        </StoreProvider>
-      </ApolloProvider>
+      <Layout style={{ flex: 1 }}>
+        <Routes />
+      </Layout>
     </ThemeProvider>
   );
 };
 
 const AppProvider = () => {
-  const { currentTheme, toggleThemeType } = useEvaTheme();
+  const evaTheme = useEvaTheme();
+  console.log("eva", evaTheme.themeType);
   return (
     <>
       <IconRegistry icons={EvaIconsPack} />
-      <ApplicationProvider {...eva} theme={currentTheme}>
+      <ApplicationProvider {...eva} theme={evaTheme.currentTheme}>
         <App />
       </ApplicationProvider>
     </>
@@ -56,8 +51,14 @@ const AppProvider = () => {
 
 export default () => {
   return (
-    <ThemeContextProvider>
-      <AppProvider />
-    </ThemeContextProvider>
+    <ApolloProvider client={client}>
+      <StoreProvider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <ThemeContextProvider>
+            <AppProvider />
+          </ThemeContextProvider>
+        </PersistGate>
+      </StoreProvider>
+    </ApolloProvider>
   );
 };

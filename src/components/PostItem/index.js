@@ -237,6 +237,8 @@ function usePost(userId, postId, amountComments) {
     },
   });
 
+  console.log(postData);
+
   const likesCount = postData?.likesConnection?.aggregate?.count;
   const commentsCount = postData?.commentsConnection?.aggregate?.count;
   const post = postData?.post;

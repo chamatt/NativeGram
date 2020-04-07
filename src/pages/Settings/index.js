@@ -52,7 +52,10 @@ const Settings = () => {
   const drawerData = [
     {
       title: "Change Theme",
-      onPress: toggleThemeType,
+      onPress: async () => {
+        toggleThemeType();
+        client.clearStore();
+      },
       icon: (style) => (
         <Icon
           {...style}
