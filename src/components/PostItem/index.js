@@ -46,7 +46,7 @@ const HAS_LIKED = gql`
 `;
 
 const FETCH_POST = gql`
-  query fetchPost($postId: ID!, $userId: ID!) {
+  query fetchPost($postId: ID!, $userId: ID!, $amountComments: Int) {
     likesConnection(where: { post: { id: $postId } }) {
       aggregate {
         count
@@ -63,7 +63,7 @@ const FETCH_POST = gql`
       images {
         url
       }
-      comments(limit: 5, sort: "createdAt:desc") {
+      comments(limit: $amountComments, sort: "createdAt:desc") {
         id
         createdAt
         user {
@@ -95,7 +95,8 @@ const Post = ({
   userId,
   postId,
   showInput = false,
-  showViewAllComments = false,
+  showViewAllComments = true,
+  amountComments = 3,
 }) => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -112,7 +113,7 @@ const Post = ({
     postError,
     hasLikedError,
     createLike,
-  } = usePost(userId, postId);
+  } = usePost(userId, postId, amountComments);
 
   if (postLoading || hasLikedLoading) return <LoadingPage />;
   return (
@@ -167,9 +168,12 @@ const Post = ({
         <Text>{post?.description}</Text>
         <SizedBox height={20} />
         <Text category="h6">Comments</Text>
-        <SizedBox height={20} />
-        <CommentInput postId={postId}></CommentInput>
-
+        {showInput && (
+          <>
+            <SizedBox height={20} />
+            <CommentInput postId={postId}></CommentInput>
+          </>
+        )}
         <SizedBox height={20} />
         <Layout>
           {post?.comments?.map((comment) => (
@@ -184,20 +188,24 @@ const Post = ({
             ></CommentItem>
           ))}
         </Layout>
-        <SizedBox height={20} />
-        <Button
-          size="tiny"
-          status="basic"
-          onPress={() => navigation.push("Comments", { postId })}
-        >
-          View All Comments
-        </Button>
+        {showViewAllComments && (
+          <>
+            <SizedBox height={20} />
+            <Button
+              size="tiny"
+              status="basic"
+              onPress={() => navigation.push("Comments", { postId })}
+            >
+              View All Comments
+            </Button>
+          </>
+        )}
       </Body>
     </Container>
   );
 };
 
-function usePost(userId, postId) {
+function usePost(userId, postId, amountComments) {
   const {
     data: hasLiked,
     loading: hasLikedLoading,
@@ -219,6 +227,7 @@ function usePost(userId, postId) {
     variables: {
       postId,
       userId,
+      amountComments,
     },
   });
 

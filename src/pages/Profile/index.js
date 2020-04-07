@@ -77,12 +77,14 @@ const Profile = () => {
   });
   const userId = route?.params?.userId;
 
-  const { data: posts, loading: postsLoading, error: postsError } = useQuery(
-    FETCH_POSTS,
-    {
-      variables: { id: userId || me },
-    }
-  );
+  const {
+    data: posts,
+    loading: postsLoading,
+    error: postsError,
+    refetch: postsRefetch,
+  } = useQuery(FETCH_POSTS, {
+    variables: { id: userId || me },
+  });
   function renderHeader() {
     return (
       <Header>
@@ -126,14 +128,17 @@ const Profile = () => {
     }
   }, [userId]);
 
-  if (profileLoading) return <LoadingPage />;
+  if (profileLoading || postsLoading) return <LoadingPage />;
   return (
     <Container>
       <SafeAreaView>
         <Body>
           <FlatList
             ListHeaderComponent={renderHeader}
-            onRefresh={() => profileRefetch()}
+            onRefresh={() => {
+              profileRefetch();
+              postsRefetch();
+            }}
             refreshing={profileLoading || postsLoading}
             data={posts?.user?.posts}
             keyExtractor={(item) => item.id}

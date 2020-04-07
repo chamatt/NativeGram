@@ -4,13 +4,14 @@ import { gql } from "apollo-boost";
 import { useQuery } from "@apollo/react-hooks";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Dimensions, FlatList } from "react-native";
-import { LoadingPage } from "~/components/LoadingIndicator";
+import LoadingIndicator, { LoadingPage } from "~/components/LoadingIndicator";
 import { Container, Body } from "./styles";
 import SizedBox from "~/components//SizedBox";
 import CommentItem from "~/components//CommentItem";
 import CommentInput from "~/components//CommentInput";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import { SafeAreaView } from "~/components/SafeArea";
+import { uniqBy } from "lodash";
 
 const FETCH_COMMENTS = gql`
   query fetchComments($postId: ID!, $offset: Int!) {
@@ -41,19 +42,16 @@ const Comments = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const theme = useTheme();
-  const {
-    data,
-    loading,
-    error,
-    refetch,
-    fetchMore,
-    subscribeToMore,
-  } = useQuery(FETCH_COMMENTS, {
-    variables: {
-      postId: route?.params?.postId,
-      offset: 0,
-    },
-  });
+  const { data, loading, error, refetch, fetchMore, networkStatus } = useQuery(
+    FETCH_COMMENTS,
+    {
+      variables: {
+        postId: route?.params?.postId,
+        offset: 0,
+      },
+      notifyOnNetworkStatusChange: true,
+    }
+  );
 
   //   useEffect(() => {
   //     const subscribeToNewComments = () => {
@@ -74,7 +72,7 @@ const Comments = () => {
   //     };
   //   }, [subscribeToMore]);
 
-  if (loading) return <LoadingPage />;
+  //   if (loading) return <LoadingPage />;
   return (
     <Container>
       <SafeAreaView style={{ flex: 1 }}>
@@ -98,7 +96,7 @@ const Comments = () => {
             </>
           )}
           onRefresh={refetch}
-          refreshing={loading}
+          refreshing={networkStatus === 4}
           data={data?.comments}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
@@ -118,6 +116,9 @@ const Comments = () => {
               </>
             );
           }}
+          //   ListFooterComponent={() => {
+          //     return loading && <LoadingIndicator />;
+          //   }}
           onEndReached={() => {
             fetchMore({
               variables: { offset: data?.comments?.length + 1 },
@@ -128,9 +129,13 @@ const Comments = () => {
                   fetchMoreResult?.comments?.length === 0
                 )
                   return prev;
+                const newComments = uniqBy(
+                  [...prev?.comments, ...fetchMoreResult?.comments],
+                  "id"
+                );
                 return {
                   ...prev,
-                  comments: [...prev?.comments, ...fetchMoreResult?.comments],
+                  comments: newComments,
                 };
               },
             });

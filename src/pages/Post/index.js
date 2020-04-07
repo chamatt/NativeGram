@@ -22,7 +22,13 @@ const Post = () => {
         extraHeight={150}
       >
         <Container>
-          <PostItem userId={userId} postId={postId} />
+          <PostItem
+            userId={userId}
+            postId={postId}
+            showInput
+            showViewAllComments
+            amountComments={3}
+          />
         </Container>
       </KeyboardAwareScrollView>
     </Layout>

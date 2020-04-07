@@ -70,9 +70,7 @@ export default function CommentItem({ avatar, author, body, userId, date }) {
           <Author>@{author}</Author>
         </AuthorContainer>
         <Right>
-          <Footer>
-            {formattedDate} ago {isNew && "(new)"}
-          </Footer>
+          <Footer new={isNew}>{formattedDate}</Footer>
         </Right>
       </Header>
 

@@ -21,6 +21,11 @@ export const Footer = styled(Text).attrs({
   category: "c1",
 })`
   color: ${(props) => props.theme["text-hint-color"]};
+  ${(props) =>
+    props.new &&
+    `
+  color:${props.theme["text-primary-color"]}
+  `}
   padding-left: 35px;
 `;
 export const AuthorContainer = styled.TouchableOpacity`
