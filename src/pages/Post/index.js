@@ -6,6 +6,7 @@ import { Container, Body } from "./styles";
 import PostItem from "~/components/PostItem";
 import { LoadingPage } from "~/components/LoadingIndicator";
 import { Layout } from "@ui-kitten/components";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const Post = () => {
   const route = useRoute();
@@ -15,12 +16,21 @@ const Post = () => {
   const { params: { postId = null, userId = null } = null } = route;
 
   return (
-    <Layout level="3">
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <Layout level="3" style={{ flex: 1 }}>
+      <KeyboardAwareScrollView
+        showsVerticalScrollIndicator={false}
+        extraHeight={150}
+      >
         <Container>
-          <PostItem userId={userId} postId={postId} />
+          <PostItem
+            userId={userId}
+            postId={postId}
+            showInput
+            showViewAllComments
+            amountComments={3}
+          />
         </Container>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </Layout>
   );
 };

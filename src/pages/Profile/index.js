@@ -20,10 +20,7 @@ import LoadingIndicator, { LoadingPage } from "~/components/LoadingIndicator";
 import Categories from "./components/Categories";
 import PostThumbnail from "~/components/PostThumbnail";
 import { FlatList } from "react-native";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+import { defaultAvatar } from "~/constants";
 
 const SettingsIcon = (style) => <Icon {...style} name="settings" />;
 
@@ -80,18 +77,24 @@ const Profile = () => {
   });
   const userId = route?.params?.userId;
 
-  const { data: posts, loading: postsLoading, error: postsError } = useQuery(
-    FETCH_POSTS,
-    {
-      variables: { id: userId || me },
-    }
-  );
+  const {
+    data: posts,
+    loading: postsLoading,
+    error: postsError,
+    refetch: postsRefetch,
+  } = useQuery(FETCH_POSTS, {
+    variables: { id: userId || me },
+  });
   function renderHeader() {
     return (
       <Header>
         <UserAvatar
           size="giant"
-          source={{ uri: profile?.user?.profile?.avatar?.url }}
+          source={
+            profile?.user?.profile?.avatar?.url
+              ? { uri: profile?.user?.profile?.avatar?.url }
+              : defaultAvatar
+          }
         />
         <SizedBox height={20}></SizedBox>
         <Text category="h5">{profile?.user?.profile?.name}</Text>
@@ -125,14 +128,17 @@ const Profile = () => {
     }
   }, [userId]);
 
-  if (profileLoading) return <LoadingPage />;
+  if (profileLoading || postsLoading) return <LoadingPage />;
   return (
     <Container>
       <SafeAreaView>
         <Body>
           <FlatList
             ListHeaderComponent={renderHeader}
-            onRefresh={() => profileRefetch()}
+            onRefresh={() => {
+              profileRefetch();
+              postsRefetch();
+            }}
             refreshing={profileLoading || postsLoading}
             data={posts?.user?.posts}
             keyExtractor={(item) => item.id}
