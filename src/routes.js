@@ -19,6 +19,7 @@ import ProfileScreen from "~/pages/Profile";
 import SignIn from "~/pages/SignIn";
 import SignUp from "~/pages/SignUp";
 import PostScreen from "~/pages/Post";
+import CommentScreen from "~/pages/Comments";
 import SettingsScreen from "~/pages/Settings";
 import { BottomSafeArea } from "~/components/SafeArea";
 import { useStoreState } from "easy-peasy";
@@ -128,7 +129,7 @@ const PostStack = () => {
     <>
       <Post.Screen name="Post" component={PostScreen}></Post.Screen>
 
-      <Post.Screen name="Comment" component={PostScreen}></Post.Screen>
+      <Post.Screen name="Comments" component={CommentScreen}></Post.Screen>
     </>
     // </Post.Navigator>
   );

@@ -20,10 +20,7 @@ import LoadingIndicator, { LoadingPage } from "~/components/LoadingIndicator";
 import Categories from "./components/Categories";
 import PostThumbnail from "~/components/PostThumbnail";
 import { FlatList } from "react-native";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+import { defaultAvatar } from "~/constants";
 
 const SettingsIcon = (style) => <Icon {...style} name="settings" />;
 
@@ -91,7 +88,11 @@ const Profile = () => {
       <Header>
         <UserAvatar
           size="giant"
-          source={{ uri: profile?.user?.profile?.avatar?.url }}
+          source={
+            profile?.user?.profile?.avatar?.url
+              ? { uri: profile?.user?.profile?.avatar?.url }
+              : defaultAvatar
+          }
         />
         <SizedBox height={20}></SizedBox>
         <Text category="h5">{profile?.user?.profile?.name}</Text>
