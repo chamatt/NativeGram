@@ -17,6 +17,7 @@ import { SafeAreaView, TopSafeArea } from "../SafeArea";
 import { Button, Layout, Text, Icon, useTheme } from "@ui-kitten/components";
 import { Camera as RNCamera } from "expo-camera";
 import { useNavigation } from "@react-navigation/native";
+import { useEvaTheme } from "~/context/ThemeContext";
 // const DESIRED_RATIO = "16:9";
 
 export default function Camera() {
@@ -25,6 +26,7 @@ export default function Camera() {
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(RNCamera.Constants.Type.front);
   const theme = useTheme();
+  const { themeType } = useEvaTheme();
 
   useEffect(() => {
     (async () => {
@@ -68,6 +70,10 @@ export default function Camera() {
 
   return (
     <Container>
+      <StatusBar
+        backgroundColor={theme["background-basic-color-1"]}
+        barStyle={themeType === "light" ? "dark-content" : "light-content"}
+      />
       <Header>
         <GalleryButton onPress={() => {}}>Gallery</GalleryButton>
       </Header>
