@@ -16,6 +16,7 @@ import { ApolloProvider } from "@apollo/react-hooks";
 import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider } from "styled-components";
 import { useEvaTheme, ThemeContextProvider } from "~/context/ThemeContext";
+import { StatusBar } from "react-native";
 
 const App = () => {
   // const [theme, setTheme] = React.useState("light");
@@ -25,10 +26,15 @@ const App = () => {
   //   const nextTheme = theme === "light" ? "dark" : "light";
   //   setTheme(nextTheme);
   // };
+  const { themeType } = useEvaTheme();
 
   const theme = useTheme();
   return (
     <ThemeProvider theme={theme}>
+      <StatusBar
+        backgroundColor={theme["background-basic-color-1"]}
+        barStyle={themeType === "light" ? "dark-content" : "light-content"}
+      />
       <Layout style={{ flex: 1 }}>
         <Routes />
       </Layout>

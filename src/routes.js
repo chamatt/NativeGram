@@ -24,6 +24,7 @@ import SettingsScreen from "~/pages/Settings";
 import { BottomSafeArea } from "~/components/SafeArea";
 import { useStoreState } from "easy-peasy";
 import EditProfile from "./pages/EditProfile";
+import NewPostCamera from "./pages/NewPostCamera";
 
 const BottomTab = createBottomTabNavigator();
 const Auth = createStackNavigator();
@@ -80,7 +81,11 @@ const TabNavigator = () => {
         initialRouteName="Profile"
       >
         <BottomTab.Screen name="Home" component={Home} />
-        <BottomTab.Screen name="Camera" component={ProfileStack} />
+        <BottomTab.Screen
+          name="Camera"
+          component={NewPostCamera}
+          options={{ tabBarVisible: false }}
+        />
         <BottomTab.Screen name="Profile" component={ProfileStack} />
       </BottomTab.Navigator>
       <BottomSafeArea
