@@ -1,5 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Layout, Input, Button, Icon } from "@ui-kitten/components";
+import {
+  Layout,
+  Input,
+  Button,
+  Icon,
+  Calendar,
+  Datepicker,
+} from "@ui-kitten/components";
 
 import { UserAvatar } from "./styles";
 import { gql } from "apollo-boost";
@@ -7,8 +14,10 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { useStoreState } from "easy-peasy";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import SizedBox from "~/components/SizedBox";
-import LoadingIndicator from "~/components/LoadingIndicator";
+import LoadingIndicator, { LoadingPage } from "~/components/LoadingIndicator";
 import { defaultAvatar } from "~/constants";
+import { View } from "react-native";
+import { parseISO, format } from "date-fns";
 
 const UPDATE_PROFILE = gql`
   mutation updateProfile(
@@ -62,6 +71,7 @@ const FETCH_PROFILE = gql`
         id
         bio
         name
+        birthdate
         avatar {
           url
         }
@@ -136,6 +146,19 @@ const useMyProfile = () => {
   };
 };
 
+const now = new Date();
+
+const tminus120 = new Date(
+  now.getFullYear() - 120,
+  now.getMonth(),
+  now.getDate()
+);
+const tminus13 = new Date(
+  now.getFullYear() - 13,
+  now.getMonth(),
+  now.getDate()
+);
+
 export default function EditProfile() {
   const {
     profile,
@@ -155,17 +178,20 @@ export default function EditProfile() {
   const route = useRoute();
   const [name, setName] = useState();
   const [bio, setBio] = useState();
+  const [birthdate, setBirthdate] = React.useState(null);
 
   const handleEditProfile = useCallback(() => {
-    if (profile?.user?.profile)
+    if (profile?.user?.profile) {
+      console.log(birthdate, format(birthdate, "yyyy-MM-dd"));
       updateProfile({
         variables: {
           profileId: profile?.user?.profile?.id,
           name,
           bio,
+          birthdate: birthdate ? format(birthdate, "yyyy-MM-dd") : null,
         },
       });
-    else {
+    } else {
       createProfile({
         variables: {
           name,
@@ -174,7 +200,7 @@ export default function EditProfile() {
         },
       });
     }
-  }, [profile, name, bio]);
+  }, [profile, name, bio, birthdate]);
 
   useEffect(() => {
     const loading = updateProfileLoading || createProfileLoading;
@@ -198,13 +224,26 @@ export default function EditProfile() {
         ></Button>
       ),
     });
-  }, [updateProfileLoading, createProfileLoading, profile, name, bio]);
+  }, [
+    updateProfileLoading,
+    createProfileLoading,
+    profile,
+    name,
+    bio,
+    birthdate,
+  ]);
 
   useEffect(() => {
     setName(profile?.user?.profile?.name);
     setBio(profile?.user?.profile?.bio);
-    console.warn(profile);
+    if (profile?.user?.profile?.birthdate) {
+      setBirthdate(parseISO(profile?.user?.profile?.birthdate));
+    }
+    // setDate(profile?.user?.profile?.birthdate);
+    console.log(profile?.user?.profile?.birthdate);
   }, [profile]);
+
+  if (profileLoading) return <LoadingPage />;
 
   return (
     <Layout level="2" style={{ flex: 1, padding: 20, alignItems: "center" }}>
@@ -218,6 +257,7 @@ export default function EditProfile() {
       />
       <SizedBox height={20} />
       <Input
+        style={{ width: "100%" }}
         label="Full Name"
         autoCapitalize="none"
         placeholder="Your Name"
@@ -226,17 +266,31 @@ export default function EditProfile() {
       />
 
       <SizedBox height={20} />
-      <Input
-        label="Biography"
-        autoCapitalize="none"
-        multiline
-        maxLength={500}
-        numberOfLines={4}
-        placeholder="Write a small paragraph about you"
-        size="large"
-        style={{ minHeight: 100 }}
-        value={bio}
-        onChangeText={setBio}
+      <View style={{ width: "100%" }}>
+        <Input
+          style={{ width: "100%" }}
+          label="Biography"
+          autoCapitalize="none"
+          multiline
+          maxLength={500}
+          numberOfLines={4}
+          placeholder="Write a small paragraph about you"
+          size="large"
+          style={{ minHeight: 100 }}
+          value={bio}
+          onChangeText={setBio}
+        />
+      </View>
+
+      <SizedBox height={20} />
+
+      <Datepicker
+        label="Birthdate"
+        style={{ width: "100%" }}
+        min={tminus120}
+        max={tminus13}
+        date={birthdate}
+        onSelect={(nextDate) => setBirthdate(nextDate)}
       />
     </Layout>
   );

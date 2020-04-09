@@ -7,8 +7,9 @@ import {
 } from "react-native-responsive-screen";
 
 export const Container = styled(Layout)`
-  width: ${wp("90%")}px;
-  border-radius: ${wp("5%")}px;
+  /* width: ${wp("90%")}px; */
+  width: 100%;
+  /* border-radius: 15px; */
 `;
 
 export const Header = styled.TouchableOpacity`
@@ -27,7 +28,7 @@ export const PostImage = styled.Image.attrs({ resizeMode: "cover" })`
   width: ${wp("85%")}px;
   height: ${wp("85%")}px;
 
-  border-radius: ${wp("3%")}px;
+  border-radius: 10px;
 
   /* border-top-right-radius: ${wp("3%")}px;
   border-top-left-radius: ${wp("3%")}px; */

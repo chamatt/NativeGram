@@ -5,6 +5,17 @@ import { Dimensions } from "react-native";
 
 const EditIcon = (style) => <Icon {...style} name="edit-2" />;
 
+const PieChartIcon = (style) => <Icon {...style} name="pie-chart-2" />;
+
+export const PieIcon = styled(PieChartIcon).attrs((props) => ({
+  namme: "pie-chart-2",
+  tintColor: props.theme["text-danger-color"],
+  width: 15,
+  height: 15,
+}))`
+  padding-right: 5px;
+`;
+
 export const Container = styled(Layout)`
   flex: 1;
 `;
@@ -29,3 +40,9 @@ export const EditButton = styled(Button).attrs({
   size: "tiny",
   icon: EditIcon,
 })``;
+
+export const BirthdateContainer = styled.View`
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
