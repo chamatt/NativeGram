@@ -7,13 +7,22 @@ import {
   Spinner,
   Drawer,
   Icon,
+  useTheme,
 } from "@ui-kitten/components";
 import { useStoreActions, useStoreState } from "easy-peasy";
 import { gql } from "apollo-boost";
 import { useQuery } from "@apollo/react-hooks";
 import { useRoute, useNavigation } from "@react-navigation/native";
 
-import { Container, Header, Body, EditButton, UserAvatar } from "./styles";
+import {
+  Container,
+  Header,
+  Body,
+  EditButton,
+  UserAvatar,
+  PieIcon,
+  BirthdateContainer,
+} from "./styles";
 import { SafeAreaView, TopSafeArea } from "~/components/SafeArea";
 import SizedBox from "~/components/SizedBox";
 import LoadingIndicator, { LoadingPage } from "~/components/LoadingIndicator";
@@ -21,6 +30,7 @@ import Categories from "./components/Categories";
 import PostThumbnail from "~/components/PostThumbnail";
 import { FlatList } from "react-native";
 import { defaultAvatar } from "~/constants";
+import { format, parseISO } from "date-fns";
 
 const SettingsIcon = (style) => <Icon {...style} name="settings" />;
 
@@ -31,6 +41,7 @@ const FETCH_PROFILE = gql`
         id
         bio
         name
+        birthdate
         avatar {
           url
         }
@@ -67,6 +78,7 @@ const Profile = () => {
   const auth = useStoreState((state) => state.auth);
   const navigation = useNavigation();
   const route = useRoute();
+  const theme = useTheme();
   const {
     data: profile,
     loading: profileLoading,
@@ -99,6 +111,15 @@ const Profile = () => {
         <SizedBox height={20}></SizedBox>
         <Text category="h5">{profile?.user?.profile?.name}</Text>
         <Text category="p1">{profile?.user?.profile?.bio}</Text>
+
+        {profile?.user?.profile?.birthdate && (
+          <BirthdateContainer>
+            <PieIcon />
+            <SizedBox width={3}></SizedBox>
+            <Text category="c1">{profile?.user?.profile?.birthdate}</Text>
+          </BirthdateContainer>
+        )}
+
         <SizedBox height={20}></SizedBox>
         {(!userId || userId === me) && (
           <EditButton onPress={() => navigation.navigate("EditProfile")}>

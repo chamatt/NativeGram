@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from "react";
-import { Layout, Text, Avatar, Button } from "@ui-kitten/components";
+import React, { useEffect, useRef, useState } from "react";
+import { Layout, Text, Avatar, Button, useTheme } from "@ui-kitten/components";
 import { useStoreActions, useStoreState } from "easy-peasy";
 import { gql } from "apollo-boost";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import Carousel from "react-native-snap-carousel";
+import Carousel, { Pagination } from "react-native-snap-carousel";
 import { Image, Dimensions } from "react-native";
 import { LoadingPage } from "~/components/LoadingIndicator";
 import {
@@ -102,6 +102,7 @@ const Post = ({
   const navigation = useNavigation();
   const carouselRef = useRef();
   const commentInputRef = useRef();
+  const theme = useTheme();
   const {
     post,
     user,
@@ -114,6 +115,8 @@ const Post = ({
     hasLikedError,
     createLike,
   } = usePost(userId, postId, amountComments);
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   if (postLoading || hasLikedLoading) return <LoadingPage />;
   return (
@@ -138,6 +141,7 @@ const Post = ({
       {post?.images && (
         <CarouselContainer>
           <Carousel
+            onSnapToItem={(index) => setSelectedIndex(index)}
             ref={carouselRef}
             data={post?.images}
             layout="default"
@@ -146,11 +150,19 @@ const Post = ({
                 <PostImage source={{ uri: item?.url }} resizeMode="cover" />
               );
             }}
-            sliderWidth={wp("85%")}
+            sliderWidth={wp("100%")}
             itemWidth={wp("85%")}
           />
         </CarouselContainer>
       )}
+      <Pagination
+        dotsLength={post?.images?.length}
+        activeDotIndex={selectedIndex}
+        containerStyle={{ paddingBottom: 0, paddingTop: 20 }}
+        dotStyle={{
+          backgroundColor: theme["text-primary-color"],
+        }}
+      />
       <PostActions>
         <PostAction
           type="like"
@@ -236,8 +248,6 @@ function usePost(userId, postId, amountComments) {
       postRefetch();
     },
   });
-
-  console.log(postData);
 
   const likesCount = postData?.likesConnection?.aggregate?.count;
   const commentsCount = postData?.commentsConnection?.aggregate?.count;
