@@ -10,15 +10,33 @@ const { height, width } = Dimensions.get("window");
 const newWidth = height * (3 / 4);
 const newHeight = width * (4 / 3);
 
-export const ExpoCameraPlaceholder = styled.View`
+export const PhotoLoading = styled.View`
   background-color: black;
   height: ${newHeight}px;
   width: ${width}px;
+  align-items: center;
+  justify-content: center;
 `;
 
-export const ExpoCamera = styled(Camera)`
+export const PhotoContainer = styled.View`
+  background-color: black;
+  /* height: ${newHeight}px;
+  width: ${width}px;
+  align-items: center;
+  justify-content: center; */
+`;
+export const Photo = styled.Image.attrs({
+  resizeMode: "contain",
+})`
+  background-color: black;
   height: ${newHeight}px;
   width: ${width}px;
+
+  ${(props) =>
+    props.flipX &&
+    `
+    transform: rotateY(180deg);
+  `}
 `;
 
 export const Container = styled(SafeAreaView)`
@@ -42,40 +60,10 @@ export const Footer = styled.View`
   justify-content: space-around;
 `;
 
-const galleryIcon = (style) => <Icon {...style} name="grid" />;
-
-export const GalleryButton = styled(Button).attrs({
-  appearance: "ghost",
-  status: "primary",
-  icon: galleryIcon,
-})``;
-
-export const CameraButton = styled.TouchableOpacity.attrs((props) => ({
-  disabled: props.loading,
-}))`
-  width: 64px;
-  height: 64px;
-  border-radius: 32px;
-  background-color: ${(props) =>
-    props.loading
-      ? props.theme["color-basic-disabled"]
-      : props.theme["color-primary-default"]};
-  justify-content: center;
-  align-items: center;
-`;
 export const FooterItem = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  flex: 1;
-`;
-
-export const CameraButtonIcon = styled(Icon).attrs((props) => ({
-  name: "camera-outline",
-  width: 30,
-  height: 30,
-  tintColor: "#FFFFFF",
-}))`
   flex: 1;
 `;
 
