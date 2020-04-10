@@ -7,6 +7,7 @@ import PostItem from "~/components/PostItem";
 import { LoadingPage } from "~/components/LoadingIndicator";
 import { Layout } from "@ui-kitten/components";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { SharedElement } from "react-navigation-shared-element";
 
 const Post = () => {
   const route = useRoute();

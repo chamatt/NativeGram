@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Layout,
   Text,
@@ -13,6 +13,7 @@ import { useStoreActions, useStoreState } from "easy-peasy";
 import { gql } from "apollo-boost";
 import { useQuery } from "@apollo/react-hooks";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import { View } from "react-native";
 
 import {
   Container,
@@ -22,6 +23,7 @@ import {
   UserAvatar,
   PieIcon,
   BirthdateContainer,
+  BioContainer,
 } from "./styles";
 import { SafeAreaView, TopSafeArea } from "~/components/SafeArea";
 import SizedBox from "~/components/SizedBox";
@@ -31,6 +33,8 @@ import PostThumbnail from "~/components/PostThumbnail";
 import { FlatList } from "react-native";
 import { defaultAvatar } from "~/constants";
 import { format, parseISO } from "date-fns";
+import { SharedElement } from "react-navigation-shared-element";
+import maxLength from "~/utils/maxLength";
 
 const SettingsIcon = (style) => <Icon {...style} name="settings" />;
 
@@ -59,10 +63,11 @@ const FETCH_PROFILE = gql`
 const FETCH_POSTS = gql`
   query fetchPosts($id: ID!) {
     user(id: $id) {
-      posts {
+      posts(sort: "createdAt:desc") {
         id
         images {
           id
+          provider_metadata
           url
         }
         user {
@@ -97,7 +102,21 @@ const Profile = () => {
   } = useQuery(FETCH_POSTS, {
     variables: { id: userId || me },
   });
+
+  console.log(maxLength(profile?.user?.profile?.bio || "", 100));
   function renderHeader() {
+    const [showFullBio, setShowFullBio] = useState(false);
+    const { text: bioText, overflow: bioOverflow } = maxLength(
+      profile?.user?.profile?.bio,
+      80
+    );
+    const toggleBio = () => {
+      console.log("aaaaaaaaaaaaaaaa");
+      showFullBio ? setShowFullBio(false) : setShowFullBio(true);
+    };
+
+    console.log(showFullBio);
+
     return (
       <Header>
         <UserAvatar
@@ -109,9 +128,18 @@ const Profile = () => {
           }
         />
         <SizedBox height={20}></SizedBox>
-        <Text category="h5">{profile?.user?.profile?.name}</Text>
-        <Text category="p1">{profile?.user?.profile?.bio}</Text>
-
+        <Text maxWidth={400} category="h5">
+          {profile?.user?.profile?.name}
+        </Text>
+        <SizedBox height={10}></SizedBox>
+        <BioContainer onPress={toggleBio}>
+          <Text numberOfLines={showFullBio ? null : 4} category="p1">
+            {showFullBio
+              ? profile?.user?.profile?.bio
+              : bioText?.trim().replace(/[\n\r]/gi, " ")}
+          </Text>
+        </BioContainer>
+        <SizedBox height={10}></SizedBox>
         {profile?.user?.profile?.birthdate && (
           <BirthdateContainer>
             <PieIcon />
@@ -149,7 +177,7 @@ const Profile = () => {
     }
   }, [userId]);
 
-  if (profileLoading || postsLoading) return <LoadingPage />;
+  // if (profileLoading || postsLoading) return <LoadingPage />;
   return (
     <Container>
       <SafeAreaView>
@@ -167,6 +195,7 @@ const Profile = () => {
               <PostThumbnail
                 id={id}
                 userId={user?.id}
+                publicId={images?.[0]?.provider_metadata?.public_id}
                 image={images?.[0]?.url}
               />
             )}

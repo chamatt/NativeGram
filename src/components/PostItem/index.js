@@ -14,6 +14,7 @@ import {
   Header,
   CarouselContainer,
   PostActions,
+  PostImagePlaceholder,
 } from "./styles";
 import {
   widthPercentageToDP as wp,
@@ -24,6 +25,7 @@ import SizedBox from "~/components/SizedBox";
 import CommentItem from "~/components/CommentItem";
 import { defaultAvatar } from "~/constants/";
 import CommentInput from "~/components/CommentInput";
+import { SharedElement } from "react-navigation-shared-element";
 
 const CREATE_LIKE = gql`
   mutation createLike($userId: ID!, $postId: ID!) {
@@ -61,7 +63,9 @@ const FETCH_POST = gql`
       id
       description
       images {
+        id
         url
+        provider_metadata
       }
       comments(limit: $amountComments, sort: "createdAt:desc") {
         id
@@ -118,7 +122,7 @@ const Post = ({
 
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  if (postLoading || hasLikedLoading) return <LoadingPage />;
+  // if (postLoading || hasLikedLoading) return <LoadingPage />;
   return (
     <Container>
       <Header
@@ -138,16 +142,38 @@ const Post = ({
         <SizedBox width={10} />
         <Text category="s1">{user?.profile?.name || user?.username}</Text>
       </Header>
-      {post?.images && (
+
+      {postLoading && (
+        <CarouselContainer>
+          <SharedElement id={`post.${postId}.photo`}>
+            <PostImagePlaceholder />
+          </SharedElement>
+        </CarouselContainer>
+      )}
+      {!postLoading && post?.images && (
         <CarouselContainer>
           <Carousel
+            removeClippedSubviews={false}
             onSnapToItem={(index) => setSelectedIndex(index)}
             ref={carouselRef}
             data={post?.images}
             layout="default"
             renderItem={({ item }) => {
+              if (item?.url === post?.images?.[0]?.url) {
+                return (
+                  <SharedElement id={`post.${postId}.photo`}>
+                    <PostImage
+                      publicId={item?.provider_metadata?.public_id}
+                      resizeMode="cover"
+                    />
+                  </SharedElement>
+                );
+              }
               return (
-                <PostImage source={{ uri: item?.url }} resizeMode="cover" />
+                <PostImage
+                  publicId={item?.provider_metadata?.public_id}
+                  resizeMode="cover"
+                />
               );
             }}
             sliderWidth={wp("100%")}
@@ -156,7 +182,7 @@ const Post = ({
         </CarouselContainer>
       )}
       <Pagination
-        dotsLength={post?.images?.length}
+        dotsLength={post?.images?.length || 0}
         activeDotIndex={selectedIndex}
         containerStyle={{ paddingBottom: 0, paddingTop: 20 }}
         dotStyle={{

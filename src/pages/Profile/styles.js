@@ -46,3 +46,8 @@ export const BirthdateContainer = styled.View`
   justify-content: center;
   align-items: center;
 `;
+
+export const BioContainer = styled.TouchableOpacity`
+  align-self: center;
+  padding: 0 20px;
+`;

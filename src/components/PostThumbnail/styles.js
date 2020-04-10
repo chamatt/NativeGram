@@ -4,15 +4,27 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import cloudinary from "cloudinary-core";
+const cl = new cloudinary.Cloudinary({
+  cloud_name: "matheusvicente",
+});
 
 export const Container = styled.TouchableOpacity`
-  padding: ${wp("5%")}px;
+  /* padding: ${wp("5%")}px; */
 `;
 
-export const Thumbnail = styled.ImageBackground.attrs({
-  resizeMode: "cover",
-  imageStyle: { borderRadius: wp("5%") },
-})`
-  width: ${wp("40%")}px;
-  height: ${wp("40%")}px;
+export const Thumbnail = styled.Image.attrs((props) => ({
+  resizeMode: "contain",
+  source: {
+    uri: cl.url(props.publicId, {
+      width: 250,
+      height: 250,
+      gravity: "faces",
+      crop: "fill",
+    }),
+  },
+}))`
+  width: ${wp("33.3%")}px;
+  height: ${wp("33.3%")}px;
+  /* border-radius: ${wp("5%")}px; */
 `;

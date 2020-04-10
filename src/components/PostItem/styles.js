@@ -5,6 +5,10 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import cloudinary from "cloudinary-core";
+const cl = new cloudinary.Cloudinary({
+  cloud_name: "matheusvicente",
+});
 
 export const Container = styled(Layout)`
   /* width: ${wp("90%")}px; */
@@ -23,10 +27,26 @@ export const Body = styled(Layout)`
   padding-bottom: 20px;
   border-radius: ${wp("3%")}px;
 `;
-
-export const PostImage = styled.Image.attrs({ resizeMode: "cover" })`
+export const PostImagePlaceholder = styled.View`
   width: ${wp("85%")}px;
   height: ${wp("85%")}px;
+  border-radius: 10px;
+  background: black;
+`;
+export const PostImage = styled.Image.attrs((props) => ({
+  resizeMode: "cover",
+  source: {
+    uri: cl.url(props.publicId, {
+      width: 600,
+      height: 600,
+      crop: "fill",
+    }),
+  },
+}))`
+  width: ${wp("85%")}px;
+  height: ${wp("85%")}px;
+
+  
 
   border-radius: 10px;
 

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import { Text, useTheme } from "@ui-kitten/components";
 import { gql } from "apollo-boost";
 import { useQuery } from "@apollo/react-hooks";
@@ -53,6 +53,21 @@ const Comments = () => {
     }
   );
 
+  const [notHasMore, setNotHasMore] = useState(false);
+
+  const renderHeader = useMemo(
+    () => (
+      <>
+        <SizedBox height={20} />
+        <Text category="h6">Comments</Text>
+        <SizedBox height={20} />
+        <CommentInput postId={route?.params?.postId}></CommentInput>
+        <SizedBox height={20} />
+      </>
+    ),
+    [route?.params?.postId]
+  );
+
   //   useEffect(() => {
   //     const subscribeToNewComments = () => {
   //       subscribeToMore({
@@ -78,24 +93,16 @@ const Comments = () => {
       <SafeAreaView style={{ flex: 1 }}>
         <FlatList
           contentContainerStyle={{
-            width: widthPercentageToDP("90%"),
+            width: widthPercentageToDP("100%"),
             paddingHorizontal: 20,
             paddingBottom: 30,
-            marginVertical: 20,
-
-            borderRadius: widthPercentageToDP("3%"),
             backgroundColor: theme["background-basic-color-1"],
           }}
-          ListHeaderComponent={() => (
-            <>
-              <SizedBox height={20} />
-              <Text category="h6">Comments</Text>
-              <SizedBox height={20} />
-              <CommentInput postId={route?.params?.postId}></CommentInput>
-              <SizedBox height={20} />
-            </>
-          )}
-          onRefresh={refetch}
+          ListHeaderComponent={renderHeader}
+          onRefresh={() => {
+            setNotHasMore(false);
+            refetch();
+          }}
           refreshing={networkStatus === 4}
           data={data?.comments}
           keyExtractor={(item) => item.id}
@@ -116,29 +123,36 @@ const Comments = () => {
               </>
             );
           }}
-          //   ListFooterComponent={() => {
-          //     return loading && <LoadingIndicator />;
-          //   }}
+          ListFooterComponent={() => {
+            return loading && <LoadingIndicator />;
+          }}
+          onEndReachedThreshold={0.5}
           onEndReached={() => {
-            fetchMore({
-              variables: { offset: data?.comments?.length + 1 },
-              updateQuery: (prev, { fetchMoreResult }) => {
-                if (
-                  !fetchMoreResult ||
-                  !fetchMoreResult?.comments?.length ||
-                  fetchMoreResult?.comments?.length === 0
-                )
-                  return prev;
-                const newComments = uniqBy(
-                  [...prev?.comments, ...fetchMoreResult?.comments],
-                  "id"
-                );
-                return {
-                  ...prev,
-                  comments: newComments,
-                };
-              },
-            });
+            if (!notHasMore) {
+              fetchMore({
+                variables: { offset: data?.comments?.length + 1 },
+                updateQuery: (prev, { fetchMoreResult }) => {
+                  if (
+                    !fetchMoreResult ||
+                    !fetchMoreResult?.comments?.length ||
+                    fetchMoreResult?.comments?.length === 0
+                  ) {
+                    setNotHasMore(true);
+                    return prev;
+                  }
+
+                  console.log("fetchmore");
+                  const newComments = uniqBy(
+                    [...prev?.comments, ...fetchMoreResult?.comments],
+                    "id"
+                  );
+                  return {
+                    ...prev,
+                    comments: newComments,
+                  };
+                },
+              });
+            }
           }}
         ></FlatList>
       </SafeAreaView>

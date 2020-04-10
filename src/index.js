@@ -1,5 +1,3 @@
-import "webgltexture-loader-expo-camera";
-
 import React from "react";
 import {
   ApplicationProvider,

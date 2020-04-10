@@ -20,7 +20,7 @@ const CREATE_COMMENT = gql`
   }
 `;
 
-export default function CommentInput({ postId }) {
+function CommentInput({ postId }) {
   const me = useStoreState((state) => state?.auth?.user?._id);
   const [createComment, { data, loading, error }] = useMutation(
     CREATE_COMMENT,
@@ -58,3 +58,5 @@ export default function CommentInput({ postId }) {
     </Container>
   );
 }
+
+export default React.memo(CommentInput);

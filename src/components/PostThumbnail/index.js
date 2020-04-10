@@ -2,11 +2,19 @@ import React from "react";
 
 import { Container, Thumbnail } from "./styles";
 import { useNavigation } from "@react-navigation/native";
+import { SharedElement } from "react-navigation-shared-element";
+import {
+  Image,
+  Video,
+  Transformation,
+  CloudinaryContext,
+} from "cloudinary-react";
 
 export default function PostThumbnail({
   id,
   userId,
   image,
+  publicId,
   onSelect,
   ...rest
 }) {
@@ -16,7 +24,12 @@ export default function PostThumbnail({
       onPress={() => navigation.push("Post", { postId: id, userId: userId })}
       {...rest}
     >
-      <Thumbnail source={{ uri: image }}></Thumbnail>
+      <SharedElement key={id} id={`post.${id}.photo`}>
+        <Thumbnail
+          publicId={publicId}
+          // source={{ uri: image }}
+        ></Thumbnail>
+      </SharedElement>
     </Container>
   );
 }

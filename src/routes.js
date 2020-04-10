@@ -14,6 +14,7 @@ import {
   createStackNavigator,
   CardStyleInterpolators,
 } from "@react-navigation/stack";
+import { createSharedElementStackNavigator } from "react-navigation-shared-element";
 import Home from "~/pages/Home";
 import ProfileScreen from "~/pages/Profile";
 import SignIn from "~/pages/SignIn";
@@ -29,8 +30,8 @@ import NewPostCamera from "./pages/NewPostCamera";
 const BottomTab = createBottomTabNavigator();
 const Auth = createStackNavigator();
 const Root = createStackNavigator();
-const Profile = createStackNavigator();
-const Post = createStackNavigator();
+const Profile = createSharedElementStackNavigator();
+const Post = createSharedElementStackNavigator();
 
 const PersonIcon = (style) => <Icon {...style} name="person" />;
 const HomeIcon = (style) => <Icon {...style} name="home" />;
@@ -114,12 +115,12 @@ const ProfileStack = () => {
         options={{ title: "Edit Profile" }}
         component={EditProfile}
       ></Profile.Screen>
-      {PostStack()}
+      {PostStack(Profile)}
     </Profile.Navigator>
   );
 };
 
-const PostStack = () => {
+const PostStack = (Navigator) => {
   const theme = useTheme();
 
   return (
@@ -132,9 +133,24 @@ const PostStack = () => {
     //   }}
     // >
     <>
-      <Post.Screen name="Post" component={PostScreen}></Post.Screen>
-
-      <Post.Screen name="Comments" component={CommentScreen}></Post.Screen>
+      <Navigator.Screen
+        name="Post"
+        sharedElementsConfig={(route, otherRoute, showing) => {
+          const { postId } = route.params;
+          if (otherRoute.name === "Profile" && showing)
+            return [
+              {
+                id: `post.${postId}.photo`,
+                // animation: "fade",
+              },
+            ];
+        }}
+        component={PostScreen}
+      ></Navigator.Screen>
+      <Navigator.Screen
+        name="Comments"
+        component={CommentScreen}
+      ></Navigator.Screen>
     </>
     // </Post.Navigator>
   );
