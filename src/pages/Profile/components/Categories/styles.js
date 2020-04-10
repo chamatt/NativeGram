@@ -8,13 +8,13 @@ import {
 
 const WIDTH = Dimensions.get("screen").width;
 
-export const CategoryContainer = styled(Layout)`
+export const CategoryContainer = styled.View`
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
   width: 100%;
 `;
-export const CategoryItem = styled(Layout)`
+export const CategoryItem = styled.View`
   align-items: center;
   justify-content: center;
   padding: 0px 10px;
