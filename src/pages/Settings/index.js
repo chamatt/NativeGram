@@ -76,7 +76,11 @@ const Settings = () => {
       route.onPress();
     }
     if (route.title === "Logout") {
-      await client.clearStore();
+      // await client.clearStore().then(() => {
+      //   client.resetStore();
+      //   signOut();
+      // });
+      client.cache.reset();
       signOut();
     }
 

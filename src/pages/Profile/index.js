@@ -83,6 +83,7 @@ const Profile = () => {
   const auth = useStoreState((state) => state.auth);
   const navigation = useNavigation();
   const route = useRoute();
+  const params = route.params;
   const theme = useTheme();
   const {
     data: profile,
@@ -103,7 +104,12 @@ const Profile = () => {
     variables: { id: userId || me },
   });
 
-  console.log(maxLength(profile?.user?.profile?.bio || "", 100));
+  useEffect(() => {
+    if (params?.shouldReset) {
+      postsRefetch();
+    }
+  }, [params]);
+
   function renderHeader() {
     const [showFullBio, setShowFullBio] = useState(false);
     const { text: bioText, overflow: bioOverflow } = maxLength(
@@ -111,11 +117,8 @@ const Profile = () => {
       80
     );
     const toggleBio = () => {
-      console.log("aaaaaaaaaaaaaaaa");
       showFullBio ? setShowFullBio(false) : setShowFullBio(true);
     };
-
-    console.log(showFullBio);
 
     return (
       <Header>
@@ -199,7 +202,7 @@ const Profile = () => {
                 image={images?.[0]?.url}
               />
             )}
-            numColumns={2}
+            numColumns={3}
           ></FlatList>
         </Body>
       </SafeAreaView>

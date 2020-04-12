@@ -130,7 +130,6 @@ export default function Camera({ redirectTo }) {
       setLoadingCapture(false);
     } else {
       setLoadingCapture(false);
-      console.warn("kadjfklad");
     }
   };
 

@@ -1,4 +1,4 @@
-import { thunk, action } from "easy-peasy";
+import { thunk, action, thunkOn } from "easy-peasy";
 import { AsyncStorage, Alert } from "react-native";
 import api from "~/services/api";
 
@@ -27,12 +27,12 @@ export default {
 
       const { jwt, user } = response.data;
 
-      //   console?.tron?.log(jwt, user);
-
       await AsyncStorage.setItem("@nativegram/token", jwt);
       actions.signInSuccess({ jwt, user });
+      api.defaults.headers.common["Authorization"] = `Bearer ${jwt}`;
       actions.setLoading(false);
     } catch (err) {
+      console.warn(err);
       const message = err?.response?.data?.data?.[0]?.messages?.[0]?.message;
 
       Alert.alert(
@@ -73,7 +73,19 @@ export default {
   signOut: thunk(async (actions, payload, { getState }) => {
     await AsyncStorage.removeItem("@nativegram/token");
     actions.signOutSuccess();
+    api.defaults.headers.common["Authorization"] = null;
   }),
+
+  onAddTodo: thunkOn(
+    (actions) => "persist/REHYDRATE",
+    async (actions, target) => {
+      if (target?.payload?.auth?.token)
+        api.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${target.payload.auth.token}`;
+    }
+  ),
+
   signOutSuccess: action((state) => {
     state.user = null;
     state.token = null;

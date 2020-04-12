@@ -141,7 +141,6 @@ const Comments = () => {
                     return prev;
                   }
 
-                  console.log("fetchmore");
                   const newComments = uniqBy(
                     [...prev?.comments, ...fetchMoreResult?.comments],
                     "id"
