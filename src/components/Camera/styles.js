@@ -12,7 +12,7 @@ const newHeight = width * (4 / 3);
 
 export const ExpoCameraPlaceholder = styled.View`
   background-color: black;
-  height: ${newHeight}px;
+  height: ${width}px;
   width: ${width}px;
 `;
 
@@ -93,4 +93,32 @@ export const FooterAcessoryIcon = styled(Icon).attrs((props) => ({
 }))`
   /* width: 30;
   height: 30; */
+`;
+
+const mediaLibraryHeight = 100;
+
+export const MediaLibraryContainer = styled.View`
+  height: ${mediaLibraryHeight}px;
+  /* flex: 1; */
+  /* width: 100%; */
+  /* background: red; */
+`;
+
+export const MediaLibraryScrollView = styled.FlatList.attrs({
+  horizontal: true,
+  showsHorizontalScrollIndicator: false,
+})`
+  height: ${mediaLibraryHeight}px;
+`;
+
+export const MediaLibraryItemContainer = styled.TouchableOpacity`
+  height: ${mediaLibraryHeight}px;
+  width: ${mediaLibraryHeight}px;
+  /* background: blue; */
+  /* padding: 10px; */
+  /* width: 100%; */
+`;
+export const MediaLibraryItem = styled.Image.attrs({ resizeMode: "cover" })`
+  height: ${mediaLibraryHeight}px;
+  width: ${mediaLibraryHeight}px;
 `;

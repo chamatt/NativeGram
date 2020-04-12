@@ -25,13 +25,17 @@ import SettingsScreen from "~/pages/Settings";
 import { BottomSafeArea } from "~/components/SafeArea";
 import { useStoreState } from "easy-peasy";
 import EditProfile from "./pages/EditProfile";
-import NewPostCamera from "./pages/NewPostCamera";
+
+import CreatePostCamera from "~/pages/CreatePost/CreatePostCamera";
+import CreatePostEditor from "~/pages/CreatePost/CreatePostEditor";
+import CreatePostScreen from "~/pages/CreatePost/CreatePostScreen";
 
 const BottomTab = createBottomTabNavigator();
 const Auth = createStackNavigator();
 const Root = createStackNavigator();
 const Profile = createSharedElementStackNavigator();
 const Post = createSharedElementStackNavigator();
+const CreatePost = createSharedElementStackNavigator();
 
 const PersonIcon = (style) => <Icon {...style} name="person" />;
 const HomeIcon = (style) => <Icon {...style} name="home" />;
@@ -83,8 +87,8 @@ const TabNavigator = () => {
       >
         <BottomTab.Screen name="Home" component={Home} />
         <BottomTab.Screen
-          name="Camera"
-          component={NewPostCamera}
+          name="CreatePost"
+          component={CreatePostStack}
           options={{ tabBarVisible: false }}
         />
         <BottomTab.Screen name="Profile" component={ProfileStack} />
@@ -156,12 +160,67 @@ const PostStack = (Navigator) => {
   );
 };
 
+const CreatePostStack = () => {
+  const theme = useTheme();
+  return (
+    <CreatePost.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: theme["background-basic-color-1"] },
+        headerTintColor: theme["text-basic-color"],
+        // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        // mode: "card",
+      }}
+    >
+      <CreatePost.Screen
+        options={{
+          title: "",
+        }}
+        name="CreatePost/Camera"
+        component={CreatePostCamera}
+      ></CreatePost.Screen>
+      <CreatePost.Screen
+        options={{
+          title: "Editor",
+        }}
+        name="CreatePost/Editor"
+        component={CreatePostEditor}
+        sharedElementsConfig={(route, otherRoute, showing) => {
+          const { image } = route.params;
+          // if (
+          //   (otherRoute.name === "CreatePost/Save" ||
+          //     otherRoute.name === "CreatePost/Camera") &&
+          //   showing
+          // )
+          return [
+            {
+              id: `createPost.${image.uri}.photo`,
+              // animation: "fade",
+            },
+          ];
+        }}
+      ></CreatePost.Screen>
+      <CreatePost.Screen
+        options={{
+          title: "Post",
+        }}
+        name="CreatePost/Save"
+        component={CreatePostScreen}
+      ></CreatePost.Screen>
+    </CreatePost.Navigator>
+  );
+};
+
 const Routes = () => {
   const theme = useTheme();
   const isAuthenticated = useStoreState((state) => state.auth.signed);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      screenOptions={{
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        mode: "card",
+      }}
+    >
       <Root.Navigator
         screenOptions={{
           headerStyle: { backgroundColor: theme["background-basic-color-1"] },

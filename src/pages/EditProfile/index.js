@@ -18,6 +18,7 @@ import LoadingIndicator, { LoadingPage } from "~/components/LoadingIndicator";
 import { defaultAvatar } from "~/constants";
 import { View } from "react-native";
 import { parseISO, format } from "date-fns";
+import { useEvaTheme } from "~/context/ThemeContext";
 
 const UPDATE_PROFILE = gql`
   mutation updateProfile(
@@ -176,10 +177,10 @@ export default function EditProfile() {
   const me = useStoreState((state) => state?.auth?.user?._id);
   const navigation = useNavigation();
   const route = useRoute();
+  const { themeType } = useEvaTheme();
   const [name, setName] = useState();
   const [bio, setBio] = useState();
   const [birthdate, setBirthdate] = React.useState(null);
-
   const handleEditProfile = useCallback(() => {
     if (profile?.user?.profile) {
       console.log(birthdate, format(birthdate, "yyyy-MM-dd"));
@@ -257,6 +258,7 @@ export default function EditProfile() {
       />
       <SizedBox height={20} />
       <Input
+        keyboardAppearance={themeType}
         style={{ width: "100%" }}
         label="Full Name"
         autoCapitalize="none"
@@ -268,6 +270,7 @@ export default function EditProfile() {
       <SizedBox height={20} />
       <View style={{ width: "100%" }}>
         <Input
+          keyboardAppearance={themeType}
           style={{ width: "100%" }}
           label="Biography"
           autoCapitalize="none"
@@ -279,12 +282,14 @@ export default function EditProfile() {
           style={{ minHeight: 100 }}
           value={bio}
           onChangeText={setBio}
+          textAlignVertical="top"
         />
       </View>
 
       <SizedBox height={20} />
 
       <Datepicker
+        keyboardAppearance={themeType}
         label="Birthdate"
         style={{ width: "100%" }}
         min={tminus120}

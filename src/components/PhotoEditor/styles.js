@@ -12,7 +12,7 @@ const newHeight = width * (4 / 3);
 
 export const PhotoLoading = styled.View`
   background-color: black;
-  height: ${newHeight}px;
+  height: ${width}px;
   width: ${width}px;
   align-items: center;
   justify-content: center;
@@ -26,10 +26,10 @@ export const PhotoContainer = styled.View`
   justify-content: center; */
 `;
 export const Photo = styled.Image.attrs({
-  resizeMode: "contain",
+  resizeMode: "cover",
 })`
   background-color: black;
-  height: ${newHeight}px;
+  height: ${width}px;
   width: ${width}px;
 
   ${(props) =>

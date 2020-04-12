@@ -4,6 +4,6 @@ import Camera from "~/components/Camera";
 
 // import { Container } from './styles';
 
-export default function NewPostCamera() {
-  return <Camera />;
+export default function CreatePostCamera() {
+  return <Camera redirectTo="CreatePost/Editor" />;
 }
