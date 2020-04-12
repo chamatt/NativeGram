@@ -32,6 +32,7 @@ import * as ImagePicker from "expo-image-picker";
 import Constants from "expo-constants";
 import * as Permissions from "expo-permissions";
 import * as ImageManipulator from "expo-image-manipulator";
+import { SharedElement } from "react-navigation-shared-element";
 
 // const shaders = Shaders.create({
 //   Saturate: {
@@ -77,7 +78,7 @@ const flipImage = async (img) => {
   );
 };
 
-export default function PhotoEditor({ image, flipX, loading, onBack }) {
+export default function PhotoEditor({ image, flipX, saveImage, redirectTo }) {
   const navigation = useNavigation();
   const theme = useTheme();
   const { themeType } = useEvaTheme();
@@ -98,6 +99,11 @@ export default function PhotoEditor({ image, flipX, loading, onBack }) {
     })();
   }, [image]);
 
+  function handleSave() {
+    saveImage(editedImage);
+    navigation.navigate(redirectTo, { image: editedImage });
+  }
+
   return (
     <SafeAreaView>
       <Container>
@@ -105,20 +111,20 @@ export default function PhotoEditor({ image, flipX, loading, onBack }) {
           backgroundColor={theme["background-basic-color-1"]}
           barStyle={themeType === "light" ? "dark-content" : "light-content"}
         />
-        <Header>
-          <Button onPress={() => onBack()}>Close</Button>
-        </Header>
-        {loading || !image ? (
+
+        {!image ? (
           <PhotoLoading>
             <LoadingIndicator tintColor="#FFFFFF" />
           </PhotoLoading>
         ) : (
-          <PhotoContainer>
-            <Photo
-              source={{ uri: showOriginal ? image?.uri : editedImage?.uri }}
-              flipX={showOriginal && flipX}
-            ></Photo>
-          </PhotoContainer>
+          <SharedElement id={`createPost.${image?.uri}.photo`}>
+            <PhotoContainer>
+              <Photo
+                source={{ uri: showOriginal ? image?.uri : editedImage?.uri }}
+                flipX={showOriginal && flipX}
+              ></Photo>
+            </PhotoContainer>
+          </SharedElement>
         )}
 
         {/* <Surface width={480} height={300}>
@@ -128,11 +134,11 @@ export default function PhotoEditor({ image, flipX, loading, onBack }) {
         </Surface> */}
 
         <Footer>
-          {/* <FooterItem>
-              <FooterAcessory onPress={() => navigation.goBack()}>
-                <FooterAcessoryIcon name="close" />
-              </FooterAcessory>
-            </FooterItem> */}
+          <FooterItem>
+            <FooterAcessory onPress={handleSave}>
+              <FooterAcessoryIcon name="save" />
+            </FooterAcessory>
+          </FooterItem>
           {/* <FooterItem>
               <FooterAcessory onPress={toggleType}>
                 <FooterAcessoryIcon name="flip-2" />

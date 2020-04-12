@@ -1,5 +1,5 @@
-import React, { useContext, useState } from "react";
-
+import React, { useContext, useState, useEffect } from "react";
+import { AsyncStorage } from "react-native";
 import { mapping, light, dark } from "@eva-design/eva";
 const themes = { light, dark };
 
@@ -11,6 +11,22 @@ export const ThemeContext = React.createContext({
 export const ThemeContextProvider = ({ ...props }) => {
   const [themeType, setThemeType] = useState("light");
   const currentTheme = themes[themeType];
+
+  useEffect(() => {
+    const fetchTheme = async () => {
+      const theme =
+        (await AsyncStorage.getItem("@nativegram/theme")) || "light";
+      setThemeType(theme);
+    };
+    fetchTheme();
+  }, []);
+
+  useEffect(() => {
+    const setThemeStorage = async (newt) => {
+      await AsyncStorage.setItem("@nativegram/theme", newt);
+    };
+    setThemeStorage(themeType);
+  }, [themeType]);
 
   const toggleThemeType = () => {
     const nextTheme = themeType === "light" ? "dark" : "light";
