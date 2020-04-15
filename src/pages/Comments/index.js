@@ -142,7 +142,7 @@ const Comments = () => {
           onEndReached={() => {
             if (!notHasMore) {
               fetchMore({
-                variables: { offset: data?.comments?.length + 1 },
+                variables: { offset: data?.comments?.length },
                 updateQuery: (prev, { fetchMoreResult }) => {
                   if (
                     !fetchMoreResult ||

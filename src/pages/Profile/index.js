@@ -52,6 +52,7 @@ const FETCH_PROFILE = gql`
           url
         }
       }
+
       posts {
         id
       }
@@ -230,7 +231,7 @@ const Profile = () => {
             onEndReached={() => {
               if (!notHasMore) {
                 fetchMorePosts({
-                  variables: { offset: posts?.user?.posts?.length + 1 },
+                  variables: { offset: posts?.user?.posts?.length },
                   updateQuery: (prev, { fetchMoreResult }) => {
                     if (
                       !fetchMoreResult ||
