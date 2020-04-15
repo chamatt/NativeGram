@@ -12,6 +12,8 @@ import CommentInput from "~/components//CommentInput";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import { SafeAreaView } from "~/components/SafeArea";
 import { uniqBy } from "lodash";
+import { Image } from "react-native";
+import EmptyList from "~/components/EmptyList";
 
 const FETCH_COMMENTS = gql`
   query fetchComments($postId: ID!, $offset: Int!) {
@@ -93,6 +95,7 @@ const Comments = () => {
       <SafeAreaView style={{ flex: 1 }}>
         <FlatList
           contentContainerStyle={{
+            flex: 1,
             width: widthPercentageToDP("100%"),
             paddingHorizontal: 20,
             paddingBottom: 30,
@@ -125,6 +128,15 @@ const Comments = () => {
           }}
           ListFooterComponent={() => {
             return loading && <LoadingIndicator />;
+          }}
+          ListEmptyComponent={() => {
+            return (
+              <EmptyList
+                text="No Comments Yet"
+                loading={loading}
+                refetch={refetch}
+              />
+            );
           }}
           onEndReachedThreshold={0.5}
           onEndReached={() => {

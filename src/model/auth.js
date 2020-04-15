@@ -19,6 +19,7 @@ export default {
     actions.setLoading(true);
     try {
       const { email, password } = payload;
+      console.log("auth", api.defaults.headers.common["Authorization"]);
 
       const response = await api.post("auth/local", {
         identifier: email,
@@ -32,7 +33,7 @@ export default {
       api.defaults.headers.common["Authorization"] = `Bearer ${jwt}`;
       actions.setLoading(false);
     } catch (err) {
-      console.warn(err);
+      console.warn(err.response.data);
       const message = err?.response?.data?.data?.[0]?.messages?.[0]?.message;
 
       Alert.alert(
@@ -72,17 +73,20 @@ export default {
   }),
   signOut: thunk(async (actions, payload, { getState }) => {
     await AsyncStorage.removeItem("@nativegram/token");
+    const token = await AsyncStorage.removeItem("@nativegram/token");
     actions.signOutSuccess();
-    api.defaults.headers.common["Authorization"] = null;
+
+    delete api.defaults.headers.common["Authorization"];
   }),
 
   onAddTodo: thunkOn(
     (actions) => "persist/REHYDRATE",
     async (actions, target) => {
-      if (target?.payload?.auth?.token)
+      if (target?.payload?.auth?.token) {
         api.defaults.headers.common[
           "Authorization"
         ] = `Bearer ${target.payload.auth.token}`;
+      }
     }
   ),
 

@@ -1,6 +1,10 @@
 import React from "react";
 import { SafeAreaView, View } from "react-native";
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  useNavigation,
+  CommonActions,
+} from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   BottomNavigation,
@@ -36,6 +40,7 @@ const Root = createStackNavigator();
 const Profile = createSharedElementStackNavigator();
 const Post = createSharedElementStackNavigator();
 const CreatePost = createSharedElementStackNavigator();
+const Feed = createStackNavigator();
 
 const PersonIcon = (style) => <Icon {...style} name="person" />;
 const HomeIcon = (style) => <Icon {...style} name="home" />;
@@ -47,6 +52,13 @@ const BottomTabBar = ({ navigation, state }) => {
   const onSelect = (index) => {
     navigation.navigate(state.routeNames[index]);
   };
+
+  const handleSecondPress = (index) => {
+    console.log(index);
+    if (navigation.canGoBack()) {
+      if (state.index === index) navigation.popToTop();
+    }
+  };
   return (
     <SafeAreaView>
       <BottomNavigation
@@ -54,9 +66,18 @@ const BottomTabBar = ({ navigation, state }) => {
         onSelect={onSelect}
         appearance="noIndicator"
       >
-        <BottomNavigationTab icon={HomeIcon} />
-        <BottomNavigationTab icon={CameraIcon} />
-        <BottomNavigationTab icon={PersonIcon} />
+        <BottomNavigationTab
+          icon={HomeIcon}
+          onPressOut={() => handleSecondPress(0)}
+        />
+        <BottomNavigationTab
+          icon={CameraIcon}
+          onPressOut={() => handleSecondPress(1)}
+        />
+        <BottomNavigationTab
+          icon={PersonIcon}
+          onPressOut={() => handleSecondPress(2)}
+        />
       </BottomNavigation>
     </SafeAreaView>
   );
@@ -85,7 +106,7 @@ const TabNavigator = () => {
         tabBar={(props) => <BottomTabBar {...props} />}
         initialRouteName="UserProfile"
       >
-        <BottomTab.Screen name="Home" component={Home} />
+        <BottomTab.Screen name="FeedStack" component={FeedStack} />
         <BottomTab.Screen
           name="CreatePost"
           component={CreatePostStack}
@@ -96,6 +117,23 @@ const TabNavigator = () => {
       <BottomSafeArea
         backgroundColor={theme["background-basic-color-1"]}
       ></BottomSafeArea>
+    </>
+  );
+};
+
+const ProfileScreens = (Navigator) => {
+  const theme = useTheme();
+  return (
+    <>
+      <Navigator.Screen
+        name="Profile"
+        component={ProfileScreen}
+      ></Navigator.Screen>
+      <Navigator.Screen
+        name="EditProfile"
+        options={{ title: "Edit Profile" }}
+        component={EditProfile}
+      ></Navigator.Screen>
     </>
   );
 };
@@ -113,29 +151,35 @@ const ProfileStack = () => {
         headerTintColor: theme["text-basic-color"],
       }}
     >
-      <Profile.Screen name="Profile" component={ProfileScreen}></Profile.Screen>
-      <Profile.Screen
-        name="EditProfile"
-        options={{ title: "Edit Profile" }}
-        component={EditProfile}
-      ></Profile.Screen>
-      {PostStack(Profile)}
+      {ProfileScreens(Profile)}
+      {PostScreens(Profile)}
     </Profile.Navigator>
   );
 };
 
-const PostStack = (Navigator) => {
+const FeedStack = () => {
+  const theme = useTheme();
+  const navigation = useNavigation();
+  return (
+    <Feed.Navigator
+      screenOptions={{
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        mode: "card",
+        headerStyle: { backgroundColor: theme["background-basic-color-1"] },
+        headerTintColor: theme["text-basic-color"],
+      }}
+    >
+      <Feed.Screen name="Feed" component={Home}></Feed.Screen>
+      {ProfileScreens(Feed)}
+      {PostScreens(Feed)}
+    </Feed.Navigator>
+  );
+};
+
+const PostScreens = (Navigator) => {
   const theme = useTheme();
 
   return (
-    // <Post.Navigator
-    //   screenOptions={{
-    //     cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-    //     mode: "card",
-    //     headerStyle: { backgroundColor: theme["background-basic-color-1"] },
-    //     headerTintColor: theme["text-basic-color"],
-    //   }}
-    // >
     <>
       <Navigator.Screen
         name="Post"
@@ -156,7 +200,6 @@ const PostStack = (Navigator) => {
         component={CommentScreen}
       ></Navigator.Screen>
     </>
-    // </Post.Navigator>
   );
 };
 

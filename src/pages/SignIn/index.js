@@ -13,8 +13,10 @@ export default function SignIn({ navigation }) {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
 
-  const signIn = useStoreActions(actions => actions.auth.signInRequest);
-  const loading = useStoreState(state => state.auth.loading);
+  const signIn = useStoreActions((actions) => actions.auth.signInRequest);
+  const loading = useStoreState((state) => state.auth.loading);
+
+  console.log({ email, password });
 
   return (
     <Container level="2">
@@ -41,7 +43,7 @@ export default function SignIn({ navigation }) {
           <Button
             icon={
               loading
-                ? style => <LoadingIndicator {...style}></LoadingIndicator>
+                ? (style) => <LoadingIndicator {...style}></LoadingIndicator>
                 : null
             }
             status="primary"

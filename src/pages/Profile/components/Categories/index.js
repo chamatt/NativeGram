@@ -7,7 +7,7 @@ import {
   CategoryCount,
 } from "./styles";
 
-export default function Categories({ posts, followers, following }) {
+export default function Categories({ posts, followers, followings }) {
   return (
     <CategoryContainer>
       <CategoryItem>
@@ -19,7 +19,7 @@ export default function Categories({ posts, followers, following }) {
         <CategoryTitle>Followers</CategoryTitle>
       </CategoryItem>
       <CategoryItem>
-        <CategoryCount>{following || 0}</CategoryCount>
+        <CategoryCount>{followings || 0}</CategoryCount>
         <CategoryTitle>Following</CategoryTitle>
       </CategoryItem>
     </CategoryContainer>

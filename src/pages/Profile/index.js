@@ -35,6 +35,8 @@ import { defaultAvatar } from "~/constants";
 import { format, parseISO } from "date-fns";
 import { SharedElement } from "react-navigation-shared-element";
 import maxLength from "~/utils/maxLength";
+import EmptyList from "~/components/EmptyList";
+import { uniqBy } from "lodash";
 
 const SettingsIcon = (style) => <Icon {...style} name="settings" />;
 
@@ -53,7 +55,10 @@ const FETCH_PROFILE = gql`
       posts {
         id
       }
-      Followers {
+      followers {
+        id
+      }
+      followings {
         id
       }
     }
@@ -61,9 +66,9 @@ const FETCH_PROFILE = gql`
 `;
 
 const FETCH_POSTS = gql`
-  query fetchPosts($id: ID!) {
+  query fetchPosts($id: ID!, $offset: Int!) {
     user(id: $id) {
-      posts(sort: "createdAt:desc") {
+      posts(sort: "createdAt:desc", start: $offset, limit: 9) {
         id
         images {
           id
@@ -100,8 +105,10 @@ const Profile = () => {
     loading: postsLoading,
     error: postsError,
     refetch: postsRefetch,
+    fetchMore: fetchMorePosts,
+    networkStatus,
   } = useQuery(FETCH_POSTS, {
-    variables: { id: userId || me },
+    variables: { id: userId || me, offset: 0 },
   });
 
   useEffect(() => {
@@ -109,6 +116,8 @@ const Profile = () => {
       postsRefetch();
     }
   }, [params]);
+
+  const [notHasMore, setNotHasMore] = useState(false);
 
   function renderHeader() {
     const [showFullBio, setShowFullBio] = useState(false);
@@ -159,7 +168,8 @@ const Profile = () => {
         )}
         <Categories
           posts={profile?.user?.posts?.length}
-          followers={profile?.user?.Followers?.length}
+          followers={profile?.user?.followers?.length}
+          followings={profile?.user?.followings?.length}
         />
       </Header>
     );
@@ -191,11 +201,14 @@ const Profile = () => {
               profileRefetch();
               postsRefetch();
             }}
-            refreshing={profileLoading || postsLoading}
+            refreshing={networkStatus === 4}
             data={posts?.user?.posts}
             keyExtractor={(item) => item.id}
             renderItem={({ item: { images, id, user } }) => (
               <PostThumbnail
+                onSelect={() =>
+                  navigation.push("Post", { postId: id, userId: user?.id })
+                }
                 id={id}
                 userId={user?.id}
                 publicId={images?.[0]?.provider_metadata?.public_id}
@@ -203,6 +216,43 @@ const Profile = () => {
               />
             )}
             numColumns={3}
+            ListFooterComponent={() => {
+              return postsLoading && <LoadingIndicator />;
+            }}
+            ListEmptyComponent={() => {
+              return (
+                <View style={{ height: 200 }}>
+                  <EmptyList text="No Posts Yet" />
+                </View>
+              );
+            }}
+            onEndReachedThreshold={0.5}
+            onEndReached={() => {
+              if (!notHasMore) {
+                fetchMorePosts({
+                  variables: { offset: posts?.user?.posts?.length + 1 },
+                  updateQuery: (prev, { fetchMoreResult }) => {
+                    if (
+                      !fetchMoreResult ||
+                      !fetchMoreResult?.user?.posts?.length ||
+                      fetchMoreResult?.user?.posts?.length === 0
+                    ) {
+                      setNotHasMore(true);
+                      return prev;
+                    }
+
+                    const newPosts = uniqBy(
+                      [...prev?.user?.posts, ...fetchMoreResult?.user?.posts],
+                      "id"
+                    );
+                    return {
+                      ...prev,
+                      user: { ...prev.user, posts: newPosts },
+                    };
+                  },
+                });
+              }
+            }}
           ></FlatList>
         </Body>
       </SafeAreaView>

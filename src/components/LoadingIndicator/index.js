@@ -2,7 +2,7 @@ import React from "react";
 import { ActivityIndicator } from "react-native";
 import { useTheme, Layout, Text } from "@ui-kitten/components";
 
-export const LoadingPage = ({ level = "2", color, progress }) => {
+export const LoadingPage = ({ level = "2", color, progress = null }) => {
   return (
     <Layout
       level={level}
