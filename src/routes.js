@@ -83,7 +83,7 @@ const TabNavigator = () => {
     <>
       <BottomTab.Navigator
         tabBar={(props) => <BottomTabBar {...props} />}
-        initialRouteName="Profile"
+        initialRouteName="UserProfile"
       >
         <BottomTab.Screen name="Home" component={Home} />
         <BottomTab.Screen
@@ -91,7 +91,7 @@ const TabNavigator = () => {
           component={CreatePostStack}
           options={{ tabBarVisible: false }}
         />
-        <BottomTab.Screen name="Profile" component={ProfileStack} />
+        <BottomTab.Screen name="UserProfile" component={ProfileStack} />
       </BottomTab.Navigator>
       <BottomSafeArea
         backgroundColor={theme["background-basic-color-1"]}

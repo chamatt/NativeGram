@@ -14,6 +14,7 @@ export default {
     actions.setCurrent(getState().images.length);
   }),
   saveImage: action((state, payload) => {
+    console.log(state.current, payload);
     state.images[state.current] = payload;
   }),
   setCurrent: action((state, payload) => {

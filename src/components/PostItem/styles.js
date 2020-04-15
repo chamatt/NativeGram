@@ -39,6 +39,7 @@ export const PostImage = styled.Image.attrs((props) => ({
     uri: cl.url(props.publicId, {
       width: 600,
       height: 600,
+      gravity: "faces",
       crop: "fill",
     }),
   },

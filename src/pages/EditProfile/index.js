@@ -183,7 +183,6 @@ export default function EditProfile() {
   const [birthdate, setBirthdate] = React.useState(null);
   const handleEditProfile = useCallback(() => {
     if (profile?.user?.profile) {
-      console.log(birthdate, format(birthdate, "yyyy-MM-dd"));
       updateProfile({
         variables: {
           profileId: profile?.user?.profile?.id,

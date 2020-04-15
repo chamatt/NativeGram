@@ -1,5 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, StatusBar, Platform, Modal } from "react-native";
+import {
+  View,
+  StatusBar,
+  Platform,
+  Modal,
+  ImageBackground,
+} from "react-native";
 
 import {
   Container,
@@ -33,6 +39,7 @@ import Constants from "expo-constants";
 import * as Permissions from "expo-permissions";
 import * as ImageManipulator from "expo-image-manipulator";
 import { SharedElement } from "react-navigation-shared-element";
+import { ImageManipulator as ImageManipulatorEx } from "expo-image-crop";
 
 // const shaders = Shaders.create({
 //   Saturate: {
@@ -61,6 +68,19 @@ import { SharedElement } from "react-navigation-shared-element";
 //   />
 // );
 
+const compressImage = async (img) => {
+  const config = img.width > img.height ? { height: 600 } : { width: 600 };
+
+  return await ImageManipulator.manipulateAsync(
+    img.uri,
+    [{ resize: { ...config } }],
+    {
+      compress: 1,
+      format: ImageManipulator.SaveFormat.JPEG,
+    }
+  );
+};
+
 const processImage = async (img) => {
   if (img.exif && img.exif.Orientation) {
     return await ImageManipulator.manipulateAsync(img.uri, [
@@ -73,8 +93,8 @@ const processImage = async (img) => {
 const flipImage = async (img) => {
   return await ImageManipulator.manipulateAsync(
     img.uri,
-    [{ flip: ImageManipulator.FlipType.Horizontal }]
-    // { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
+    [{ flip: ImageManipulator.FlipType.Horizontal }],
+    { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
   );
 };
 
@@ -85,10 +105,10 @@ export default function PhotoEditor({ image, flipX, saveImage, redirectTo }) {
   const [editedImage, setEditedImage] = useState(null);
   const [showOriginal, setShowOriginal] = useState(true);
 
-  console.log(image);
   useEffect(() => {
     (async () => {
-      const processedImage = await processImage(image);
+      const compressedImage = await compressImage(image);
+      const processedImage = await processImage(compressedImage);
       if (flipX) {
         const flippedImage = await flipImage(processedImage);
         setEditedImage(flippedImage);
@@ -103,6 +123,9 @@ export default function PhotoEditor({ image, flipX, saveImage, redirectTo }) {
     saveImage(editedImage);
     navigation.navigate(redirectTo, { image: editedImage });
   }
+
+  const [croppedImage, setCroppedImage] = useState();
+  const [modalOpen, setModalOpen] = useState(true);
 
   return (
     <SafeAreaView>
@@ -133,11 +156,26 @@ export default function PhotoEditor({ image, flipX, saveImage, redirectTo }) {
           </Saturate>
         </Surface> */}
 
+        {/* {image && (
+          <ImageManipulatorEx
+            photo={{ uri: image.uri }}
+            isVisible={modalOpen}
+            onPictureChoosed={({ uri: uriM }) => setCroppedImage({ uri: uriM })}
+            onToggleModal={() => {
+              setModalOpen(!modalOpen);
+            }}
+          />
+        )} */}
+
         <Footer>
           <FooterItem>
-            <FooterAcessory onPress={handleSave}>
-              <FooterAcessoryIcon name="save" />
-            </FooterAcessory>
+            <Button
+              icon={(styles) => <Icon {...styles} name="save" />}
+              disabled={!editedImage}
+              onPress={handleSave}
+            >
+              Use Image
+            </Button>
           </FooterItem>
           {/* <FooterItem>
               <FooterAcessory onPress={toggleType}>
