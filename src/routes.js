@@ -33,6 +33,7 @@ import EditProfile from "./pages/EditProfile";
 import CreatePostCamera from "~/pages/CreatePost/CreatePostCamera";
 import CreatePostEditor from "~/pages/CreatePost/CreatePostEditor";
 import CreatePostScreen from "~/pages/CreatePost/CreatePostScreen";
+import FollowRoute from "./pages/FollowPage";
 
 const BottomTab = createBottomTabNavigator();
 const Auth = createStackNavigator();
@@ -133,6 +134,11 @@ const ProfileScreens = (Navigator) => {
         name="EditProfile"
         options={{ title: "Edit Profile" }}
         component={EditProfile}
+      ></Navigator.Screen>
+      <Navigator.Screen
+        name="Follow"
+        options={{ title: "User Followers" }}
+        component={FollowRoute}
       ></Navigator.Screen>
     </>
   );

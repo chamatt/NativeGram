@@ -46,11 +46,13 @@ const DELETE_LIKE = gql`
   }
 `;
 
-// const HAS_LIKED = gql`
-//   query isLiked($userId: ID!, $postId: ID!) {
-
-//   }
-// `;
+const HAS_LIKED = gql`
+  query isLiked($userId: ID!, $postId: ID!) {
+    userLikes: likes(where: { user: { id: $userId }, post: { id: $postId } }) {
+      id
+    }
+  }
+`;
 
 const FETCH_POST = gql`
   query fetchPost($postId: ID!, $userId: ID!, $amountComments: Int) {
@@ -247,10 +249,10 @@ const Post = ({
         </Layout>
         {showViewAllComments && (
           <>
-            <SizedBox height={20} />
+            {/* <SizedBox height={20} /> */}
             <Button
               size="tiny"
-              appearance="outline"
+              appearance="ghost"
               status="basic"
               onPress={() => navigation.push("Comments", { postId })}
             >
@@ -264,16 +266,16 @@ const Post = ({
 };
 
 function usePost(userId, postId, amountComments) {
-  // const {
-  //   data: hasLiked,
-  //   loading: hasLikedLoading,
-  //   error: hasLikedError,
-  // } = useQuery(HAS_LIKED, {
-  //   variables: {
-  //     postId,
-  //     userId,
-  //   },
-  // });
+  const {
+    data: hasLiked,
+    loading: hasLikedLoading,
+    error: hasLikedError,
+  } = useQuery(HAS_LIKED, {
+    variables: {
+      postId,
+      userId,
+    },
+  });
 
   const {
     data: postData,
@@ -291,44 +293,44 @@ function usePost(userId, postId, amountComments) {
   const [createLikeMutation, { loading: createLikeLoading }] = useMutation(
     CREATE_LIKE,
     {
-      // onCompleted: () => {
-      //   postRefetch();
-      // },
+      onCompleted: async () => {
+        await postRefetch();
+      },
 
-      refetchQueries: ["fetchPost"],
+      refetchQueries: ["isLiked"],
       awaitRefetchQueries: true,
     }
   );
   const [deleteLikeMutation, { loading: deleteLikeLoading }] = useMutation(
     DELETE_LIKE,
     {
-      // onCompleted: () => {
-      //   postRefetch();
-      // },
-      refetchQueries: ["fetchPost"],
+      onCompleted: async () => {
+        await postRefetch();
+      },
+      refetchQueries: ["isLiked"],
       awaitRefetchQueries: true,
     }
   );
 
   const likesCount = postData?.likesConnection?.aggregate?.count;
   const userHasLiked = Boolean(postData?.userLikes?.length);
-  const userLikes = postData?.userLikes;
+  const userLikes = hasLiked?.userLikes;
   const commentsCount = postData?.commentsConnection?.aggregate?.count;
   const post = postData?.post;
   const user = postData?.user;
   const likesLoading = createLikeLoading || deleteLikeLoading;
 
   const deleteLike = () => {
-    if (!deleteLikeLoading && postData?.userLikes?.length) {
+    if (!deleteLikeLoading && hasLiked?.userLikes?.length) {
       deleteLikeMutation({
         variables: {
-          id: postData?.userLikes?.[0]?.id,
+          id: hasLiked?.userLikes?.[0]?.id,
         },
       });
     }
   };
   const createLike = (payload) => {
-    if (!createLikeLoading && !postData?.userLikes?.length) {
+    if (!createLikeLoading && !hasLiked?.userLikes?.length) {
       createLikeMutation({
         ...payload,
       });

@@ -42,11 +42,17 @@ const Home = () => {
 
   console.log(feed);
   return (
-    <Layout style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+    <Layout
+      style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      level="3"
+    >
       <SafeAreaView>
         <FlatList
           keyExtractor={(item) => item.id}
           data={feed?.posts}
+          ItemSeparatorComponent={() => (
+            <Layout level="3" style={{ margin: 1 }} />
+          )}
           renderItem={({ item: post }) => {
             return (
               <PostItem

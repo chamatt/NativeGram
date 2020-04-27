@@ -80,9 +80,6 @@ const FETCH_PROFILE = gql`
       posts {
         id
       }
-      Followers {
-        id
-      }
     }
   }
 `;

@@ -14,6 +14,7 @@ import { gql } from "apollo-boost";
 import { useQuery } from "@apollo/react-hooks";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { View } from "react-native";
+import FollowList from "~/components/FollowList";
 
 import {
   Container,
@@ -37,6 +38,7 @@ import { SharedElement } from "react-navigation-shared-element";
 import maxLength from "~/utils/maxLength";
 import EmptyList from "~/components/EmptyList";
 import { uniqBy } from "lodash";
+import UserItem from "~/components/UserItem";
 
 const SettingsIcon = (style) => <Icon {...style} name="settings" />;
 
@@ -160,14 +162,14 @@ const Profile = () => {
             <Text category="c1">{profile?.user?.profile?.birthdate}</Text>
           </BirthdateContainer>
         )}
-
         <SizedBox height={20}></SizedBox>
-        {(!userId || userId === me) && (
+        {(!userId || userId === me) && !profileLoading && (
           <EditButton onPress={() => navigation.navigate("EditProfile")}>
             Edit
           </EditButton>
         )}
         <Categories
+          userId={route?.params?.userId}
           posts={profile?.user?.posts?.length}
           followers={profile?.user?.followers?.length}
           followings={profile?.user?.followings?.length}
