@@ -172,17 +172,22 @@ const ExploreStack = () => {
   return (
     <Explore.Navigator
       screenOptions={{
-        headerShown: false,
         headerStyle: { backgroundColor: theme["background-basic-color-1"] },
         headerTintColor: theme["text-basic-color"],
       }}
     >
-      <Explore.Screen name="Explore" component={ExploreScreen} />
+      <Explore.Screen
+        options={{ headerShown: false }}
+        name="Explore"
+        component={ExploreScreen}
+      />
       <Explore.Screen
         options={{ headerShown: false }}
         name="Search"
         component={SearchScreen}
       />
+      {ProfileScreens(Explore)}
+      {PostScreens(Explore)}
     </Explore.Navigator>
   );
 };

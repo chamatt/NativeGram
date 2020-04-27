@@ -3,37 +3,43 @@ import { View } from "react-native";
 import { Input, Layout, Text, Icon, useTheme } from "@ui-kitten/components";
 import { SafeAreaView } from "~/components/SafeArea";
 
-import { Header, Body } from "./styles";
+import { Header, Body, PosedView, Box, SearchIcon, ClearIcon } from "./styles";
 import SizedBox from "~/components/SizedBox";
 import FollowList from "~/components/FollowList";
 import posed, { Transition } from "react-native-pose";
+import { gql } from "apollo-boost";
+import useDebounce from "~/hooks/useDebounce";
+import { useQuery } from "@apollo/react-hooks";
 
-const SearchIcon = (style, theme) => (
-  <Icon
-    {...style}
-    tintColor={theme["text-basic-color"]}
-    name="search-outline"
-  />
-);
-const ClearIcon = (style, theme) => (
-  <Icon {...style} tintColor={theme["text-basic-color"]} name="close-outline" />
-);
+const transformDataIntoUsers = (list) => {
+  return list?.map((item) => {
+    const imageUri = item?.profile?.avatar?.url
+      ? { uri: item?.profile?.avatar?.url }
+      : null;
 
-const PosedView = posed.View({
-  closed: {
-    opacity: 1,
-    y: 0,
-  },
-  opened: {
-    opacity: 1,
-    y: -50,
-  },
-});
+    return {
+      id: item?.id,
+      slug: item?.username,
+      name: item?.profile?.name,
+      image: imageUri,
+    };
+  });
+};
 
-const Box = posed.View({
-  enter: { opacity: 1 },
-  exit: { opacity: 0 },
-});
+const SEARCH_USERS = gql`
+  query searchUsers($term: String!) {
+    users(limit: 5, where: { username_contains: $term }) {
+      id
+      username
+      profile {
+        name
+        avatar {
+          url
+        }
+      }
+    }
+  }
+`;
 
 const useInputChanges = (initialValue = "") => {
   const [value, setValue] = React.useState(initialValue);
@@ -44,10 +50,26 @@ const useInputChanges = (initialValue = "") => {
   };
 };
 
+const useSearch = (term) => {
+  const [value, setValue] = useState();
+  const [users, setUsers] = useState([]);
+  const debouncedSearchTerm = useDebounce(value, 500);
+  console.log("debounce", debouncedSearchTerm);
+
+  const { data, loading, error } = useQuery(SEARCH_USERS, {
+    variables: { term: debouncedSearchTerm },
+  });
+  useEffect(() => {
+    setUsers(transformDataIntoUsers(data?.users || []));
+  }, [data]);
+
+  return { data, users, loading, error, value, setValue };
+};
+
 export default function Explore() {
   const theme = useTheme();
   const [showTitle, setShowTitle] = useState(true);
-  const searchControl = useInputChanges("");
+  const { data, users, loading, error, value, setValue } = useSearch();
 
   return (
     <Layout style={{ flex: 1 }}>
@@ -69,8 +91,9 @@ export default function Explore() {
                 <SizedBox height={10} />
               </>
             </Box>
-            {/* )} */}
             <Input
+              autoCapitalize="none"
+              autoCorrect={false}
               placeholder="Search for someone..."
               placeholderTextColor={theme["text-hint-color"]}
               text
@@ -85,29 +108,23 @@ export default function Explore() {
               status="control"
               onFocus={() => setShowTitle(false)}
               onBlur={() => {
-                if (!searchControl?.value?.length) setShowTitle(true);
+                if (!value?.length) setShowTitle(true);
               }}
               onIconPress={() => {
                 setShowTitle(true);
-                searchControl.setValue("");
+                setValue("");
               }}
               icon={(styles) =>
-                searchControl?.value?.length
+                value?.length
                   ? ClearIcon(styles, theme)
                   : SearchIcon(styles, theme)
               }
-              {...searchControl}
+              value={value}
+              onChangeText={setValue}
             />
           </Header>
           <Body>
-            <FollowList
-              refreshing={false}
-              users={[
-                { slug: "chamatt", name: "Matheus" },
-                { slug: "chamatt", name: "Matheus" },
-                { slug: "chamatt", name: "Matheus" },
-              ]}
-            />
+            <FollowList refreshing={false} users={users} />
           </Body>
         </SafeAreaView>
       </PosedView>

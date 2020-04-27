@@ -13,10 +13,14 @@ export default function UserItem({
   following,
   onFollow,
 }) {
+  console.log("rerender");
   const navigation = useNavigation();
   return (
     <ListItem
-      onPress={() => navigation.push("Profile", { userId: id })}
+      onPress={() => {
+        console.log("go to profile", id);
+        navigation.navigate("Profile", { screen: "Profile", userId: id });
+      }}
       title={`${name}`}
       description={`@${slug}`}
       icon={(styles) => {
