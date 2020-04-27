@@ -75,7 +75,10 @@ export default function Explore() {
             onBlur={() => {
               if (!searchControl?.value?.length) setShowTitle(true);
             }}
-            onIconPress={() => searchControl.setValue("")}
+            onIconPress={() => {
+              setShowTitle(true);
+              searchControl.setValue("");
+            }}
             icon={(styles) =>
               searchControl?.value?.length
                 ? ClearIcon(styles, theme)
