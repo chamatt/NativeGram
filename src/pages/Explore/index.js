@@ -19,9 +19,20 @@ const ClearIcon = (style, theme) => (
   <Icon {...style} tintColor={theme["text-basic-color"]} name="close-outline" />
 );
 
+const PosedView = posed.View({
+  closed: {
+    opacity: 1,
+    y: 0,
+  },
+  opened: {
+    opacity: 1,
+    y: -50,
+  },
+});
+
 const Box = posed.View({
-  enter: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -50 },
+  enter: { opacity: 1 },
+  exit: { opacity: 0 },
 });
 
 const useInputChanges = (initialValue = "") => {
@@ -40,9 +51,10 @@ export default function Explore() {
 
   return (
     <Layout style={{ flex: 1 }}>
-      <SafeAreaView>
-        <Header active={!showTitle}>
-          {showTitle && (
+      <PosedView style={{ flex: 1 }} pose={showTitle ? "closed" : "opened"}>
+        <SafeAreaView>
+          <Header active={!showTitle}>
+            {/* {showTitle && ( */}
             <Box
               key="showTitle"
               style={{ height: 50 }}
@@ -57,47 +69,48 @@ export default function Explore() {
                 <SizedBox height={10} />
               </>
             </Box>
-          )}
-          <Input
-            placeholder="Search for someone..."
-            placeholderTextColor={theme["text-hint-color"]}
-            text
-            autoFocus
-            key="searchInput"
-            textStyle={{ color: theme["text-basic-color"] }}
-            iconStyle={{ color: theme["text-basic-color"] }}
-            style={{
-              borderColor: theme["text-basic-color"],
-              backgroundColor: null,
-            }}
-            status="control"
-            onFocus={() => setShowTitle(false)}
-            onBlur={() => {
-              if (!searchControl?.value?.length) setShowTitle(true);
-            }}
-            onIconPress={() => {
-              setShowTitle(true);
-              searchControl.setValue("");
-            }}
-            icon={(styles) =>
-              searchControl?.value?.length
-                ? ClearIcon(styles, theme)
-                : SearchIcon(styles, theme)
-            }
-            {...searchControl}
-          />
-        </Header>
-        <Body>
-          <FollowList
-            refreshing={false}
-            users={[
-              { slug: "chamatt", name: "Matheus" },
-              { slug: "chamatt", name: "Matheus" },
-              { slug: "chamatt", name: "Matheus" },
-            ]}
-          />
-        </Body>
-      </SafeAreaView>
+            {/* )} */}
+            <Input
+              placeholder="Search for someone..."
+              placeholderTextColor={theme["text-hint-color"]}
+              text
+              autoFocus
+              key="searchInput"
+              textStyle={{ color: theme["text-basic-color"] }}
+              iconStyle={{ color: theme["text-basic-color"] }}
+              style={{
+                borderColor: theme["text-basic-color"],
+                backgroundColor: null,
+              }}
+              status="control"
+              onFocus={() => setShowTitle(false)}
+              onBlur={() => {
+                if (!searchControl?.value?.length) setShowTitle(true);
+              }}
+              onIconPress={() => {
+                setShowTitle(true);
+                searchControl.setValue("");
+              }}
+              icon={(styles) =>
+                searchControl?.value?.length
+                  ? ClearIcon(styles, theme)
+                  : SearchIcon(styles, theme)
+              }
+              {...searchControl}
+            />
+          </Header>
+          <Body>
+            <FollowList
+              refreshing={false}
+              users={[
+                { slug: "chamatt", name: "Matheus" },
+                { slug: "chamatt", name: "Matheus" },
+                { slug: "chamatt", name: "Matheus" },
+              ]}
+            />
+          </Body>
+        </SafeAreaView>
+      </PosedView>
     </Layout>
   );
 }
