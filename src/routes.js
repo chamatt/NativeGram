@@ -34,6 +34,8 @@ import CreatePostCamera from "~/pages/CreatePost/CreatePostCamera";
 import CreatePostEditor from "~/pages/CreatePost/CreatePostEditor";
 import CreatePostScreen from "~/pages/CreatePost/CreatePostScreen";
 import FollowRoute from "./pages/FollowPage";
+import SearchScreen from "./pages/Search";
+import ExploreScreen from "./pages/Explore";
 
 const BottomTab = createBottomTabNavigator();
 const Auth = createStackNavigator();
@@ -42,9 +44,12 @@ const Profile = createSharedElementStackNavigator();
 const Post = createSharedElementStackNavigator();
 const CreatePost = createSharedElementStackNavigator();
 const Feed = createStackNavigator();
+const Explore = createSharedElementStackNavigator();
 
 const PersonIcon = (style) => <Icon {...style} name="person" />;
 const HomeIcon = (style) => <Icon {...style} name="home" />;
+const HeartIcon = (style) => <Icon {...style} name="heart-outline" />;
+const SearchIcon = (style) => <Icon {...style} name="search-outline" />;
 const CameraIcon = (style) => (
   <Icon {...style} style={{ width: 50 }} size={20} name="camera-outline" />
 );
@@ -72,12 +77,20 @@ const BottomTabBar = ({ navigation, state }) => {
           onPressOut={() => handleSecondPress(0)}
         />
         <BottomNavigationTab
-          icon={CameraIcon}
+          icon={SearchIcon}
           onPressOut={() => handleSecondPress(1)}
         />
         <BottomNavigationTab
-          icon={PersonIcon}
+          icon={CameraIcon}
           onPressOut={() => handleSecondPress(2)}
+        />
+        <BottomNavigationTab
+          icon={HeartIcon}
+          onPressOut={() => handleSecondPress(3)}
+        />
+        <BottomNavigationTab
+          icon={PersonIcon}
+          onPressOut={() => handleSecondPress(4)}
         />
       </BottomNavigation>
     </SafeAreaView>
@@ -108,11 +121,13 @@ const TabNavigator = () => {
         initialRouteName="UserProfile"
       >
         <BottomTab.Screen name="FeedStack" component={FeedStack} />
+        <BottomTab.Screen name="Explore" component={ExploreStack} />
         <BottomTab.Screen
           name="CreatePost"
           component={CreatePostStack}
           options={{ tabBarVisible: false }}
         />
+        <BottomTab.Screen name="Notifications" component={ProfileStack} />
         <BottomTab.Screen name="UserProfile" component={ProfileStack} />
       </BottomTab.Navigator>
       <BottomSafeArea
@@ -137,10 +152,38 @@ const ProfileScreens = (Navigator) => {
       ></Navigator.Screen>
       <Navigator.Screen
         name="Follow"
-        options={{ title: "User Followers" }}
+        options={{
+          title: "User Followers",
+          headerStyle: {
+            elevation: 0,
+            shadowOpacity: 0,
+          },
+        }}
         component={FollowRoute}
       ></Navigator.Screen>
     </>
+  );
+};
+
+const ExploreStack = () => {
+  const theme = useTheme();
+  const navigation = useNavigation();
+
+  return (
+    <Explore.Navigator
+      screenOptions={{
+        headerShown: false,
+        headerStyle: { backgroundColor: theme["background-basic-color-1"] },
+        headerTintColor: theme["text-basic-color"],
+      }}
+    >
+      <Explore.Screen name="Explore" component={ExploreScreen} />
+      <Explore.Screen
+        options={{ headerShown: false }}
+        name="Search"
+        component={SearchScreen}
+      />
+    </Explore.Navigator>
   );
 };
 

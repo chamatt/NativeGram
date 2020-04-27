@@ -4,10 +4,17 @@ import UserItem from "../UserItem";
 import { RefreshControl } from "react-native";
 import { Container } from "./styles";
 
-export default function FollowList({ users, refreshing, onRefresh, ...rest }) {
+export default function FollowList({
+  users,
+  refreshing,
+  onRefresh,
+  backgroundColor,
+  ...rest
+}) {
   return (
     <Container>
       <List
+        style={{ backgroundColor: backgroundColor || null }}
         data={users}
         renderItem={({
           item: { id, image, name, slug, following, onFollow },

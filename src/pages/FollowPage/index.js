@@ -7,6 +7,9 @@ import { useRoute } from "@react-navigation/native";
 import { useStoreState } from "easy-peasy";
 import { useQuery } from "@apollo/react-hooks";
 import { useTheme, Layout } from "@ui-kitten/components";
+import EmptyList from "~/components/EmptyList";
+import { View } from "react-native";
+
 const Tab = createMaterialTopTabNavigator();
 
 // import { Container } from './styles';
@@ -104,6 +107,11 @@ const Followers = () => {
       refreshing={loading}
       onRefresh={refetch}
       showsVerticalScrollIndicator={false}
+      ListEmptyComponent={
+        <View style={{ height: 200 }}>
+          <EmptyList text="No followers" />
+        </View>
+      }
     />
   );
 };
@@ -130,6 +138,11 @@ const Following = () => {
       refreshing={loading}
       onRefresh={refetch}
       showsVerticalScrollIndicator={false}
+      ListEmptyComponent={
+        <View style={{ height: 200 }}>
+          <EmptyList text="Not following anyone" />
+        </View>
+      }
     />
   );
 };

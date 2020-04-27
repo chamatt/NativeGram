@@ -5,6 +5,7 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import cloudinary from "cloudinary-core";
+
 const cl = new cloudinary.Cloudinary({
   cloud_name: "matheusvicente",
 });
