@@ -11,7 +11,7 @@ import {
 } from "@ui-kitten/components";
 import { useStoreActions, useStoreState } from "easy-peasy";
 import { gql } from "apollo-boost";
-import { useQuery } from "@apollo/react-hooks";
+import { useQuery, useMutation } from "@apollo/react-hooks";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { View } from "react-native";
 import FollowList from "~/components/FollowList";
@@ -39,11 +39,33 @@ import maxLength from "~/utils/maxLength";
 import EmptyList from "~/components/EmptyList";
 import { uniqBy } from "lodash";
 import UserItem from "~/components/UserItem";
+import FollowButton from "~/components/FollowButton";
 
 const SettingsIcon = (style) => <Icon {...style} name="settings" />;
 
+const CREATE_FOLLOW = gql`
+  mutation createFollow($follower: ID!, $following: ID!) {
+    createFollower(
+      input: { data: { follower: $follower, following: $following } }
+    ) {
+      follower {
+        id
+      }
+    }
+  }
+`;
+const DELETE_FOLLOW = gql`
+  mutation deleteFollower($id: ID!) {
+    deleteFollower(input: { where: { id: $id } }) {
+      follower {
+        id
+      }
+    }
+  }
+`;
+
 const FETCH_PROFILE = gql`
-  query fetchProfile($id: ID!) {
+  query fetchProfile($id: ID!, $me: ID) {
     user(id: $id) {
       profile {
         id
@@ -54,7 +76,6 @@ const FETCH_PROFILE = gql`
           url
         }
       }
-
       posts {
         id
       }
@@ -64,6 +85,11 @@ const FETCH_PROFILE = gql`
       followings {
         id
       }
+    }
+    userFollows: followers(
+      where: { follower: { id: $me }, following: { id: $id } }
+    ) {
+      id
     }
   }
 `;
@@ -113,6 +139,21 @@ const Profile = () => {
   } = useQuery(FETCH_POSTS, {
     variables: { id: userId || me, offset: 0 },
   });
+
+  const [createFollow, { loading: createFollowLoading }] = useMutation(
+    CREATE_FOLLOW,
+    {
+      refetchQueries: ["fetchProfile"],
+      awaitRefetchQueries: true,
+    }
+  );
+  const [deleteFollow, { loading: deleteFollowLoading }] = useMutation(
+    DELETE_FOLLOW,
+    {
+      refetchQueries: ["fetchProfile"],
+      awaitRefetchQueries: true,
+    }
+  );
 
   useEffect(() => {
     if (params?.shouldReset) {
@@ -167,6 +208,27 @@ const Profile = () => {
           <EditButton onPress={() => navigation.navigate("EditProfile")}>
             Edit
           </EditButton>
+        )}
+        {userId && userId !== me && (
+          <FollowButton
+            loading={createFollowLoading || deleteFollowLoading}
+            following={profile?.userFollows?.length > 0}
+            onFollow={async () => {
+              return createFollow({
+                variables: {
+                  follower: me,
+                  following: userId,
+                },
+              });
+            }}
+            onUnfollow={async () => {
+              return deleteFollow({
+                variables: {
+                  id: profile?.userFollows?.[0].id,
+                },
+              });
+            }}
+          />
         )}
         <Categories
           userId={route?.params?.userId}

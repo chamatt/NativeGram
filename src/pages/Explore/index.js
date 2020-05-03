@@ -54,10 +54,10 @@ const useSearch = (term) => {
   const [value, setValue] = useState();
   const [users, setUsers] = useState([]);
   const debouncedSearchTerm = useDebounce(value, 500);
-  console.log("debounce", debouncedSearchTerm);
 
   const { data, loading, error } = useQuery(SEARCH_USERS, {
     variables: { term: debouncedSearchTerm },
+    skip: !debouncedSearchTerm,
   });
   useEffect(() => {
     setUsers(transformDataIntoUsers(data?.users || []));
