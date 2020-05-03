@@ -131,12 +131,12 @@ export default function CreatePostScreen() {
       const response = await api.post("/posts", formData, config);
       setLoading(false);
       await reset();
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 10,
-          routes: [{ name: "UserProfile", paramas: { shouldReset: true } }],
-        })
-      );
+      // navigation.dispatch(
+      //   CommonActions.reset({
+      //     index: 10,
+      //     routes: [{ name: "UserProfile", params: { shouldReset: true } }],
+      //   })
+      // );
     } catch (err) {
       const message = err?.response?.data?.data?.[0]?.messages?.[0]?.message;
       Alert.alert(

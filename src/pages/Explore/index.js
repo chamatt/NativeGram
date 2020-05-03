@@ -32,8 +32,10 @@ const SEARCH_USERS = gql`
       id
       username
       profile {
+        id
         name
         avatar {
+          id
           url
         }
       }

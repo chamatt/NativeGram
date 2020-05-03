@@ -6,6 +6,8 @@ import { useQuery } from "@apollo/react-hooks";
 import { FlatList } from "react-native";
 import PostItem from "~/components/PostItem";
 import { SafeAreaView } from "~/components/SafeArea";
+import EmptyList from "~/components/EmptyList";
+import LoadingIndicator from "~/components/LoadingIndicator";
 
 const GET_FEED = gql`
   query getFeed($userId: ID!) {
@@ -30,15 +32,16 @@ const GET_FEED = gql`
 
 const Home = () => {
   const me = useStoreState((state) => state?.auth?.user?._id);
-  console.log(me);
-  const { data: feed, loading: feedLoading, error: feedError } = useQuery(
-    GET_FEED,
-    {
-      variables: {
-        userId: me,
-      },
-    }
-  );
+  const {
+    data: feed,
+    loading: feedLoading,
+    refetch: feedRefetch,
+    error: feedError,
+  } = useQuery(GET_FEED, {
+    variables: {
+      userId: me,
+    },
+  });
 
   console.log(feed);
   return (
@@ -64,6 +67,20 @@ const Home = () => {
               />
             );
           }}
+          ListFooterComponent={() => {
+            return feedLoading && <LoadingIndicator />;
+          }}
+          ListEmptyComponent={() => {
+            return (
+              <EmptyList
+                text="No Comments Yet"
+                loading={feedLoading}
+                refetch={feedRefetch}
+              />
+            );
+          }}
+          refreshing={feedLoading}
+          onRefresh={feedRefetch}
         />
       </SafeAreaView>
     </Layout>

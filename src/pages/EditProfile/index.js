@@ -6,12 +6,18 @@ import {
   Icon,
   Calendar,
   Datepicker,
+  Text,
 } from "@ui-kitten/components";
 
-import { UserAvatar } from "./styles";
+import {
+  UserAvatar,
+  AvatarOverlay,
+  AvatarContainer,
+  CameraEditIcon,
+} from "./styles";
 import { gql } from "apollo-boost";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useStoreState } from "easy-peasy";
+import { useStoreState, useStoreActions } from "easy-peasy";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import SizedBox from "~/components/SizedBox";
 import LoadingIndicator, { LoadingPage } from "~/components/LoadingIndicator";
@@ -19,6 +25,7 @@ import { defaultAvatar } from "~/constants";
 import { View } from "react-native";
 import { parseISO, format } from "date-fns";
 import { useEvaTheme } from "~/context/ThemeContext";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const UPDATE_PROFILE = gql`
   mutation updateProfile(
@@ -68,12 +75,14 @@ const CREATE_PROFILE = gql`
 const FETCH_PROFILE = gql`
   query fetchProfile($id: ID!) {
     user(id: $id) {
+      id
       profile {
         id
         bio
         name
         birthdate
         avatar {
+          id
           url
         }
       }
@@ -92,55 +101,48 @@ const useMyProfile = () => {
     data: profile,
     loading: profileLoading,
     error: profileError,
+    refetch: profileRefetch,
   } = useQuery(FETCH_PROFILE, {
     variables: { id: me },
   });
 
-  const [
-    updateProfile,
-    {
-      data: updateProfileData,
-      loading: updateProfileLoading,
-      error: updateProfileError,
-    },
-  ] = useMutation(UPDATE_PROFILE, {
-    awaitRefetchQueries: true,
-    refetchQueries: () => ["fetchProfile"],
-    onCompleted: () => {
-      navigation.pop();
-    },
-  });
-  const [
-    createProfile,
-    {
-      data: createProfileData,
-      loading: createProfileLoading,
-      error: createProfileError,
-    },
-  ] = useMutation(CREATE_PROFILE, {
-    awaitRefetchQueries: true,
-    refetchQueries: () => ["fetchProfile"],
-    onCompleted: () => {
-      navigation.pop();
-    },
-  });
+  // const [
+  //   updateProfile,
+  //   {
+  //     data: updateProfileData,
+  //     loading: updateProfileLoading,
+  //     error: updateProfileError,
+  //   },
+  // ] = useMutation(UPDATE_PROFILE, {
+  //   awaitRefetchQueries: true,
+  //   refetchQueries: () => ["fetchProfile"],
+  //   onCompleted: () => {
+  //     navigation.pop();
+  //   },
+  // });
+  // const [
+  //   createProfile,
+  //   {
+  //     data: createProfileData,
+  //     loading: createProfileLoading,
+  //     error: createProfileError,
+  //   },
+  // ] = useMutation(CREATE_PROFILE, {
+  //   awaitRefetchQueries: true,
+  //   refetchQueries: () => ["fetchProfile"],
+  //   onCompleted: () => {
+  //     navigation.pop();
+  //   },
+  // });
 
-  useEffect(() => {
-    if (updateProfileError) alert(updateProfileError);
-  }, [updateProfileError]);
+  // useEffect(() => {
+  //   if (updateProfileError) alert(updateProfileError);
+  // }, [updateProfileError]);
 
   return {
     profile,
     profileLoading,
-    profileError,
-    updateProfile,
-    updateProfileLoading,
-    updateProfileError,
-    updateProfileData,
-    createProfile,
-    createProfileLoading,
-    createProfileError,
-    createProfileData,
+    profileRefetch,
   };
 };
 
@@ -158,19 +160,7 @@ const tminus13 = new Date(
 );
 
 export default function EditProfile() {
-  const {
-    profile,
-    profileLoading,
-    profileError,
-    updateProfile,
-    updateProfileLoading,
-    updateProfileError,
-    updateProfileData,
-    createProfile,
-    createProfileLoading,
-    createProfileError,
-    createProfileData,
-  } = useMyProfile();
+  const { profile, profileLoading, profileRefetch } = useMyProfile();
   const me = useStoreState((state) => state?.auth?.user?._id);
   const navigation = useNavigation();
   const route = useRoute();
@@ -178,40 +168,56 @@ export default function EditProfile() {
   const [name, setName] = useState();
   const [bio, setBio] = useState();
   const [birthdate, setBirthdate] = React.useState(null);
+
+  const { image, isLoading, loadingProgress } = useStoreState(
+    (state) => state.editProfile
+  );
+  const { editProfile } = useStoreActions((actions) => actions.editProfile);
+
   const handleEditProfile = useCallback(() => {
-    if (profile?.user?.profile) {
-      updateProfile({
-        variables: {
-          profileId: profile?.user?.profile?.id,
-          name,
-          bio,
-          birthdate: birthdate ? format(birthdate, "yyyy-MM-dd") : null,
-        },
-      });
-    } else {
-      createProfile({
-        variables: {
-          name,
-          bio,
-          userId: me,
-        },
-      });
-    }
-  }, [profile, name, bio, birthdate]);
+    editProfile({
+      userId: me,
+      profileId: profile?.user?.profile?.id,
+      name,
+      bio,
+      birthdate: birthdate ? format(birthdate, "yyyy-MM-dd") : null,
+      image,
+      navigation,
+      refetch: profileRefetch,
+    });
+    // if (profile?.user?.profile) {
+    //   updateProfile({
+    //     variables: {
+    //       profileId: profile?.user?.profile?.id,
+    //       name,
+    //       bio,
+    //       birthdate: birthdate ? format(birthdate, "yyyy-MM-dd") : null,
+    //     },
+    //   });
+    // } else {
+    //   createProfile({
+    //     variables: {
+    //       name,
+    //       bio,
+    //       birthdate: birthdate ? format(birthdate, "yyyy-MM-dd") : null,
+    //       userId: me,
+    //     },
+    //   });
+    // }
+  }, [profile, name, bio, birthdate, image]);
 
   useEffect(() => {
-    const loading = updateProfileLoading || createProfileLoading;
     navigation.setOptions({
       headerRight: () => (
         <Button
           appearance="ghost"
           status="primary"
-          disabled={loading}
+          disabled={isLoading}
           icon={(style) =>
-            !loading ? (
+            !isLoading ? (
               <Icon
                 {...style}
-                name={loading ? "checkmark" : "checkmark-outline"}
+                name={isLoading ? "checkmark" : "checkmark-outline"}
               />
             ) : (
               <LoadingIndicator {...style}></LoadingIndicator>
@@ -221,14 +227,7 @@ export default function EditProfile() {
         ></Button>
       ),
     });
-  }, [
-    updateProfileLoading,
-    createProfileLoading,
-    profile,
-    name,
-    bio,
-    birthdate,
-  ]);
+  }, [isLoading, profile, name, bio, birthdate, image]);
 
   useEffect(() => {
     setName(profile?.user?.profile?.name);
@@ -236,63 +235,70 @@ export default function EditProfile() {
     if (profile?.user?.profile?.birthdate) {
       setBirthdate(parseISO(profile?.user?.profile?.birthdate));
     }
-    // setDate(profile?.user?.profile?.birthdate);
-    console.log(profile?.user?.profile?.birthdate);
   }, [profile]);
 
+  if (isLoading) {
+    return <LoadingPage progress={loadingProgress} />;
+  }
   if (profileLoading) return <LoadingPage />;
 
   return (
     <Layout level="2" style={{ flex: 1, padding: 20, alignItems: "center" }}>
-      <UserAvatar
-        size="giant"
-        source={
-          profile?.user?.profile?.avatar?.url
-            ? { uri: profile?.user?.profile?.avatar?.url }
-            : defaultAvatar
-        }
-      />
-      <SizedBox height={20} />
-      <Input
-        keyboardAppearance={themeType}
-        style={{ width: "100%" }}
-        label="Full Name"
-        autoCapitalize="none"
-        placeholder="Your Name"
-        value={name}
-        onChangeText={setName}
-      />
-
-      <SizedBox height={20} />
-      <View style={{ width: "100%" }}>
+      <KeyboardAwareScrollView>
+        <AvatarContainer>
+          <UserAvatar
+            size="giant"
+            source={
+              image
+                ? image
+                : profile?.user?.profile?.avatar?.url
+                ? { uri: profile?.user?.profile?.avatar?.url }
+                : defaultAvatar
+            }
+          ></UserAvatar>
+          <AvatarOverlay onPress={() => navigation.push("EditProfile/Camera")}>
+            <CameraEditIcon />
+          </AvatarOverlay>
+        </AvatarContainer>
+        <SizedBox height={20} />
         <Input
           keyboardAppearance={themeType}
           style={{ width: "100%" }}
-          label="Biography"
+          label="Full Name"
           autoCapitalize="none"
-          multiline
-          maxLength={500}
-          numberOfLines={4}
-          placeholder="Write a small paragraph about you"
-          size="large"
-          style={{ minHeight: 100 }}
-          value={bio}
-          onChangeText={setBio}
-          textAlignVertical="top"
+          placeholder="Your Name"
+          value={name}
+          onChangeText={setName}
         />
-      </View>
-
-      <SizedBox height={20} />
-
-      <Datepicker
-        keyboardAppearance={themeType}
-        label="Birthdate"
-        style={{ width: "100%" }}
-        min={tminus120}
-        max={tminus13}
-        date={birthdate}
-        onSelect={(nextDate) => setBirthdate(nextDate)}
-      />
+        <SizedBox height={20} />
+        <View style={{ width: "100%" }}>
+          <Input
+            keyboardAppearance={themeType}
+            style={{ width: "100%" }}
+            label="Biography"
+            autoCapitalize="none"
+            multiline
+            maxLength={500}
+            numberOfLines={4}
+            placeholder="Write a small paragraph about you"
+            size="large"
+            style={{ minHeight: 100 }}
+            value={bio}
+            onChangeText={setBio}
+            textAlignVertical="top"
+          />
+        </View>
+        <SizedBox height={20} />
+        <Datepicker
+          keyboardAppearance={themeType}
+          label="Birthdate"
+          style={{ width: "100%" }}
+          min={tminus120}
+          max={tminus13}
+          date={birthdate}
+          onSelect={(nextDate) => setBirthdate(nextDate)}
+        />
+      </KeyboardAwareScrollView>
     </Layout>
   );
 }

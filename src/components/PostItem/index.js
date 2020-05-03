@@ -85,7 +85,9 @@ const FETCH_POST = gql`
           id
           username
           profile {
+            id
             avatar {
+              id
               url
             }
           }
@@ -94,9 +96,11 @@ const FETCH_POST = gql`
       }
     }
     user(id: $userId) {
+      id
       profile {
         id
         avatar {
+          id
           url
         }
         name

@@ -29,7 +29,9 @@ const FETCH_COMMENTS = gql`
         id
         username
         profile {
+          id
           avatar {
+            id
             url
           }
         }

@@ -17,14 +17,17 @@ const Tab = createMaterialTopTabNavigator();
 const FETCH_FOLLOWERS = gql`
   query fetchProfile($id: ID!) {
     user(id: $id) {
+      id
       followers {
         id
         follower {
           id
           username
           profile {
+            id
             name
             avatar {
+              id
               url
             }
           }
@@ -37,14 +40,17 @@ const FETCH_FOLLOWERS = gql`
 const FETCH_FOLLOWINGS = gql`
   query fetchProfile($id: ID!) {
     user(id: $id) {
+      id
       followings {
         id
         following {
           id
           username
           profile {
+            id
             name
             avatar {
+              id
               url
             }
           }

@@ -67,12 +67,14 @@ const DELETE_FOLLOW = gql`
 const FETCH_PROFILE = gql`
   query fetchProfile($id: ID!, $me: ID) {
     user(id: $id) {
+      id
       profile {
         id
         bio
         name
         birthdate
         avatar {
+          id
           url
         }
       }
@@ -97,6 +99,7 @@ const FETCH_PROFILE = gql`
 const FETCH_POSTS = gql`
   query fetchPosts($id: ID!, $offset: Int!) {
     user(id: $id) {
+      id
       posts(sort: "createdAt:desc", start: $offset, limit: 9) {
         id
         images {
@@ -140,6 +143,8 @@ const Profile = () => {
     variables: { id: userId || me, offset: 0 },
   });
 
+  console.log("profile", me, userId, postsError);
+
   const [createFollow, { loading: createFollowLoading }] = useMutation(
     CREATE_FOLLOW,
     {
@@ -156,8 +161,12 @@ const Profile = () => {
   );
 
   useEffect(() => {
-    if (params?.shouldReset) {
-      postsRefetch();
+    console.log("changed params", params, profile);
+    if (params?.shouldReset && profile) {
+      console.log("entered condition");
+      // profileRefetch();
+      // postsRefetch();
+      navigation.setParams({ shouldReset: false });
     }
   }, [params]);
 
@@ -264,7 +273,7 @@ const Profile = () => {
             ListHeaderComponent={renderHeader}
             onRefresh={() => {
               profileRefetch();
-              postsRefetch();
+              // postsRefetch();
             }}
             refreshing={networkStatus === 4}
             data={posts?.user?.posts}

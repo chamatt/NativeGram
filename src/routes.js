@@ -29,6 +29,8 @@ import SettingsScreen from "~/pages/Settings";
 import { BottomSafeArea } from "~/components/SafeArea";
 import { useStoreState } from "easy-peasy";
 import EditProfile from "./pages/EditProfile";
+import EditProfileCamera from "~/pages/EditProfile/EditProfileCamera";
+import EditProfileEditor from "~/pages/EditProfile/EditProfileEditor";
 
 import CreatePostCamera from "~/pages/CreatePost/CreatePostCamera";
 import CreatePostEditor from "~/pages/CreatePost/CreatePostEditor";
@@ -149,6 +151,20 @@ const ProfileScreens = (Navigator) => {
         name="EditProfile"
         options={{ title: "Edit Profile" }}
         component={EditProfile}
+      ></Navigator.Screen>
+      <Navigator.Screen
+        options={{
+          title: "",
+        }}
+        name="EditProfile/Camera"
+        component={EditProfileCamera}
+      ></Navigator.Screen>
+      <Navigator.Screen
+        options={{
+          title: "Editor",
+        }}
+        name="EditProfile/Editor"
+        component={EditProfileEditor}
       ></Navigator.Screen>
       <Navigator.Screen
         name="Follow"
