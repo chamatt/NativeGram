@@ -197,10 +197,6 @@ const ProfileScreens = (Navigator) => {
         name="Follow"
         options={{
           title: "User Followers",
-          headerStyle: {
-            // elevation: 0,
-            // shadowOpacity: 0,
-          },
         }}
         component={FollowRoute}
       ></Navigator.Screen>
