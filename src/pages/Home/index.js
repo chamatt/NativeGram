@@ -1,18 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { Layout, Text } from "@ui-kitten/components";
 import { gql } from "apollo-boost";
 import { useStoreState } from "easy-peasy";
 import { useQuery } from "@apollo/react-hooks";
-import { FlatList } from "react-native";
+import { FlatList, View } from "react-native";
 import PostItem from "~/components/PostItem";
 import { SafeAreaView } from "~/components/SafeArea";
 import EmptyList from "~/components/EmptyList";
 import LoadingIndicator from "~/components/LoadingIndicator";
+import { uniqBy } from "lodash";
+import SizedBox from "~/components/SizedBox";
 
 const GET_FEED = gql`
-  query getFeed($userId: ID!) {
+  query getFeed($userId: ID!, $offset: Int!) {
     posts(
       sort: "createdAt:desc"
+      start: $offset
+      limit: 10
       where: { user: { followers: { follower: { id: $userId } } } }
     ) {
       id
@@ -36,12 +40,19 @@ const Home = () => {
     data: feed,
     loading: feedLoading,
     refetch: feedRefetch,
+    fetchMore: fetchMorePosts,
     error: feedError,
+    networkStatus,
   } = useQuery(GET_FEED, {
     variables: {
       userId: me,
+      offset: 0,
     },
+    skip: !me,
+    notifyOnNetworkStatusChange: true,
   });
+
+  const [notHasMore, setNotHasMore] = useState(false);
 
   console.log(feed);
   return (
@@ -68,19 +79,60 @@ const Home = () => {
             );
           }}
           ListFooterComponent={() => {
-            return feedLoading && <LoadingIndicator />;
+            return (
+              feedLoading && (
+                <>
+                  <SizedBox height={20} />
+                  <LoadingIndicator />
+                  <SizedBox height={20} />
+                </>
+              )
+            );
           }}
           ListEmptyComponent={() => {
             return (
-              <EmptyList
-                text="No Comments Yet"
-                loading={feedLoading}
-                refetch={feedRefetch}
-              />
+              <View style={{ height: 400 }}>
+                <EmptyList
+                  text="Your feed is empty. Follow some friends!"
+                  // loading={feedLoading}
+                  refetch={feedRefetch}
+                />
+              </View>
             );
           }}
           refreshing={feedLoading}
+          refreshing={networkStatus === 4}
           onRefresh={feedRefetch}
+          onEndReachedThreshold={0.5}
+          onEndReached={() => {
+            if (!notHasMore) {
+              fetchMorePosts({
+                variables: { offset: feed?.posts?.length },
+                updateQuery: (prev, { fetchMoreResult }) => {
+                  if (
+                    !fetchMoreResult ||
+                    !fetchMoreResult?.posts?.length ||
+                    fetchMoreResult?.posts?.length === 0
+                  ) {
+                    setNotHasMore(true);
+                    return prev;
+                  }
+                  console.log("prev", prev?.posts?.length);
+                  console.log("nextLengh", fetchMoreResult?.posts);
+
+                  const newPosts = uniqBy(
+                    [...prev?.posts, ...fetchMoreResult?.posts],
+                    "id"
+                  );
+                  // console.log("newPosts.length", newPosts.length);
+                  return {
+                    ...prev,
+                    posts: newPosts,
+                  };
+                },
+              });
+            }
+          }}
         />
       </SafeAreaView>
     </Layout>

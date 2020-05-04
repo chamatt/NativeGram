@@ -72,11 +72,20 @@ export default {
     }
   }),
   signOut: thunk(async (actions, payload, { getState }) => {
-    await AsyncStorage.removeItem("@nativegram/token");
-    const token = await AsyncStorage.removeItem("@nativegram/token");
-    actions.signOutSuccess();
+    try {
+      await AsyncStorage.removeItem("@nativegram/token");
+      const token = await AsyncStorage.removeItem("@nativegram/token");
+      actions.signOutSuccess();
+      delete api.defaults.headers.common["Authorization"];
 
-    delete api.defaults.headers.common["Authorization"];
+      console.log(
+        "SignOut",
+        api.defaults.headers.common["Authorization"],
+        token
+      );
+    } catch (err) {
+      console.log(err);
+    }
   }),
 
   onAddTodo: thunkOn(

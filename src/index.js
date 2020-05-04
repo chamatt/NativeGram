@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   ApplicationProvider,
   Layout,
@@ -16,7 +16,8 @@ import { ApolloProvider } from "@apollo/react-hooks";
 import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider } from "styled-components";
 import { useEvaTheme, ThemeContextProvider } from "~/context/ThemeContext";
-import { StatusBar } from "react-native";
+import { StatusBar, View } from "react-native";
+import * as Font from "expo-font";
 
 const App = () => {
   // const [theme, setTheme] = React.useState("light");
@@ -29,6 +30,22 @@ const App = () => {
   const { themeType } = useEvaTheme();
 
   const theme = useTheme();
+
+  const [loadingFonts, setLoadingFonts] = useState(true);
+  useEffect(() => {
+    const fetchFonts = async () => {
+      await Font.loadAsync({
+        RichardMurray: require("./assets/fonts/RichardMurray/RichardMurray.ttf"),
+      });
+      setLoadingFonts(false);
+    };
+    fetchFonts();
+  }, []);
+
+  if (loadingFonts) {
+    return <Layout style={{ flex: 1 }} />;
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <StatusBar
@@ -44,7 +61,7 @@ const App = () => {
 
 const AppProvider = () => {
   const evaTheme = useEvaTheme();
-  console.log("eva", evaTheme.themeType);
+
   return (
     <>
       <IconRegistry icons={EvaIconsPack} />

@@ -46,6 +46,7 @@ const Settings = () => {
   const me = useStoreState((state) => state?.auth?.user?._id);
   const { data, loading, error, refetch } = useQuery(FETCH_USER, {
     variables: { id: me },
+    skip: !me,
   });
   const { themeType, toggleThemeType } = useEvaTheme();
 
@@ -80,7 +81,9 @@ const Settings = () => {
       //   client.resetStore();
       //   signOut();
       // });
-      client.cache.reset();
+      // navigation.navigate("SignIn");
+      await client.clearStore();
+      await client.cache.reset();
       signOut();
     }
 

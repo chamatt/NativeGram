@@ -97,7 +97,6 @@ const Comments = () => {
       <SafeAreaView style={{ flex: 1 }}>
         <FlatList
           contentContainerStyle={{
-            flex: 1,
             width: widthPercentageToDP("100%"),
             paddingHorizontal: 20,
             paddingBottom: 30,

@@ -19,9 +19,9 @@ export default function UserItem({
     <ListItem
       onPress={() => {
         console.log("go to profile", id);
-        navigation.navigate("Profile", { screen: "Profile", userId: id });
+        navigation.push("Profile", { screen: "Profile", userId: id });
       }}
-      title={`${name}`}
+      title={`${name || slug}`}
       description={`@${slug}`}
       icon={(styles) => {
         delete styles.tintColor;

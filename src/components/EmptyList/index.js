@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Text, Button, Icon } from "@ui-kitten/components";
 import { Container, EmptyImage, EmptyText, RefreshButton } from "./styles";
 
@@ -16,3 +17,14 @@ export default function EmptyList({ refetch, loading, text }) {
     </Container>
   );
 }
+
+EmptyList.propTypes = {
+  refetch: PropTypes.func,
+  loading: PropTypes.bool,
+  text: PropTypes.string,
+};
+EmptyList.defaultProps = {
+  refetch: null,
+  loading: false,
+  text: "",
+};

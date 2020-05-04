@@ -1,4 +1,5 @@
 import React from "react";
+import styled from "styled-components/native";
 import { SafeAreaView, View } from "react-native";
 import {
   NavigationContainer,
@@ -13,6 +14,7 @@ import {
   TopNavigationAction,
   useTheme,
   Button,
+  Layout,
 } from "@ui-kitten/components";
 import {
   createStackNavigator,
@@ -38,6 +40,7 @@ import CreatePostScreen from "~/pages/CreatePost/CreatePostScreen";
 import FollowRoute from "./pages/FollowPage";
 import SearchScreen from "./pages/Search";
 import ExploreScreen from "./pages/Explore";
+import EmptyList from "./components/EmptyList";
 
 const BottomTab = createBottomTabNavigator();
 const Auth = createStackNavigator();
@@ -47,6 +50,12 @@ const Post = createSharedElementStackNavigator();
 const CreatePost = createSharedElementStackNavigator();
 const Feed = createStackNavigator();
 const Explore = createSharedElementStackNavigator();
+
+const LogoTitle = styled.Text`
+  font-size: 24px;
+  font-family: RichardMurray;
+  color: ${(props) => props.theme["text-basic-color"]};
+`;
 
 const PersonIcon = (style) => <Icon {...style} name="person" />;
 const HomeIcon = (style) => <Icon {...style} name="home" />;
@@ -108,8 +117,20 @@ const AuthStack = () => {
         headerTintColor: theme["text-basic-color"],
       }}
     >
-      <Auth.Screen name="SignIn" component={SignIn}></Auth.Screen>
-      <Auth.Screen name="SignUp" component={SignUp}></Auth.Screen>
+      <Auth.Screen
+        name="SignIn"
+        component={SignIn}
+        options={{
+          title: "Nativegram",
+          headerTitle: (props) => <LogoTitle {...props} />,
+          headerTitleAlign: "center",
+        }}
+      ></Auth.Screen>
+      <Auth.Screen
+        name="SignUp"
+        component={SignUp}
+        options={{ title: "Create Account" }}
+      ></Auth.Screen>
     </Auth.Navigator>
   );
 };
@@ -129,7 +150,13 @@ const TabNavigator = () => {
           component={CreatePostStack}
           options={{ tabBarVisible: false }}
         />
-        <BottomTab.Screen name="Notifications" component={ProfileStack} />
+        <BottomTab.Screen name="Notifications">
+          {(props) => (
+            <Layout style={{ flex: 1 }}>
+              <EmptyList {...props} text="Under Maintenance" />
+            </Layout>
+          )}
+        </BottomTab.Screen>
         <BottomTab.Screen name="UserProfile" component={ProfileStack} />
       </BottomTab.Navigator>
       <BottomSafeArea
@@ -171,8 +198,8 @@ const ProfileScreens = (Navigator) => {
         options={{
           title: "User Followers",
           headerStyle: {
-            elevation: 0,
-            shadowOpacity: 0,
+            // elevation: 0,
+            // shadowOpacity: 0,
           },
         }}
         component={FollowRoute}
@@ -239,7 +266,15 @@ const FeedStack = () => {
         headerTintColor: theme["text-basic-color"],
       }}
     >
-      <Feed.Screen name="Feed" component={Home}></Feed.Screen>
+      <Feed.Screen
+        name="Feed"
+        component={Home}
+        options={{
+          title: "Nativegram",
+          headerTitle: (props) => <LogoTitle {...props} />,
+          headerTitleAlign: "center",
+        }}
+      ></Feed.Screen>
       {ProfileScreens(Feed)}
       {PostScreens(Feed)}
     </Feed.Navigator>

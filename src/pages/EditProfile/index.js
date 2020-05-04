@@ -243,61 +243,68 @@ export default function EditProfile() {
   if (profileLoading) return <LoadingPage />;
 
   return (
-    <Layout level="2" style={{ flex: 1, padding: 20, alignItems: "center" }}>
+    <Layout level="2" style={{ flex: 1 }}>
       <KeyboardAwareScrollView>
-        <AvatarContainer>
-          <UserAvatar
-            size="giant"
-            source={
-              image
-                ? image
-                : profile?.user?.profile?.avatar?.url
-                ? { uri: profile?.user?.profile?.avatar?.url }
-                : defaultAvatar
-            }
-          ></UserAvatar>
-          <AvatarOverlay onPress={() => navigation.push("EditProfile/Camera")}>
-            <CameraEditIcon />
-          </AvatarOverlay>
-        </AvatarContainer>
-        <SizedBox height={20} />
-        <Input
-          keyboardAppearance={themeType}
-          style={{ width: "100%" }}
-          label="Full Name"
-          autoCapitalize="none"
-          placeholder="Your Name"
-          value={name}
-          onChangeText={setName}
-        />
-        <SizedBox height={20} />
-        <View style={{ width: "100%" }}>
+        <Layout
+          level="2"
+          style={{ flex: 1, padding: 20, alignItems: "center" }}
+        >
+          <AvatarContainer>
+            <UserAvatar
+              size="giant"
+              source={
+                image
+                  ? image
+                  : profile?.user?.profile?.avatar?.url
+                  ? { uri: profile?.user?.profile?.avatar?.url }
+                  : defaultAvatar
+              }
+            ></UserAvatar>
+            <AvatarOverlay
+              onPress={() => navigation.push("EditProfile/Camera")}
+            >
+              <CameraEditIcon />
+            </AvatarOverlay>
+          </AvatarContainer>
+          <SizedBox height={20} />
           <Input
             keyboardAppearance={themeType}
             style={{ width: "100%" }}
-            label="Biography"
+            label="Full Name"
             autoCapitalize="none"
-            multiline
-            maxLength={500}
-            numberOfLines={4}
-            placeholder="Write a small paragraph about you"
-            size="large"
-            style={{ minHeight: 100 }}
-            value={bio}
-            onChangeText={setBio}
-            textAlignVertical="top"
+            placeholder="Your Name"
+            value={name}
+            onChangeText={setName}
           />
-        </View>
-        <SizedBox height={20} />
-        <Datepicker
-          keyboardAppearance={themeType}
-          label="Birthdate"
-          style={{ width: "100%" }}
-          min={tminus120}
-          max={tminus13}
-          date={birthdate}
-          onSelect={(nextDate) => setBirthdate(nextDate)}
-        />
+          <SizedBox height={20} />
+          <View style={{ width: "100%" }}>
+            <Input
+              keyboardAppearance={themeType}
+              style={{ width: "100%" }}
+              label="Biography"
+              autoCapitalize="none"
+              multiline
+              maxLength={500}
+              numberOfLines={4}
+              placeholder="Write a small paragraph about you"
+              size="large"
+              style={{ minHeight: 100 }}
+              value={bio}
+              onChangeText={setBio}
+              textAlignVertical="top"
+            />
+          </View>
+          <SizedBox height={20} />
+          <Datepicker
+            keyboardAppearance={themeType}
+            label="Birthdate"
+            style={{ width: "100%" }}
+            min={tminus120}
+            max={tminus13}
+            date={birthdate}
+            onSelect={(nextDate) => setBirthdate(nextDate)}
+          />
+        </Layout>
       </KeyboardAwareScrollView>
     </Layout>
   );

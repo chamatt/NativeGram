@@ -128,10 +128,10 @@ const Profile = () => {
     error: profileError,
     refetch: profileRefetch,
   } = useQuery(FETCH_PROFILE, {
-    variables: { id: route?.params?.userId || me },
+    variables: { id: route?.params?.userId || me, me },
+    skip: !me && !route?.params?.userId,
   });
   const userId = route?.params?.userId;
-
   const {
     data: posts,
     loading: postsLoading,
@@ -141,6 +141,7 @@ const Profile = () => {
     networkStatus,
   } = useQuery(FETCH_POSTS, {
     variables: { id: userId || me, offset: 0 },
+    skip: !(userId || me),
   });
 
   console.log("profile", me, userId, postsError);
@@ -159,6 +160,8 @@ const Profile = () => {
       awaitRefetchQueries: true,
     }
   );
+
+  console.log("userFollows", profile?.userFollows);
 
   useEffect(() => {
     console.log("changed params", params, profile);
@@ -221,7 +224,7 @@ const Profile = () => {
         {userId && userId !== me && (
           <FollowButton
             loading={createFollowLoading || deleteFollowLoading}
-            following={profile?.userFollows?.length > 0}
+            following={Boolean(profile?.userFollows?.length)}
             onFollow={async () => {
               return createFollow({
                 variables: {
@@ -291,7 +294,15 @@ const Profile = () => {
             )}
             numColumns={3}
             ListFooterComponent={() => {
-              return postsLoading && <LoadingIndicator />;
+              return (
+                postsLoading && (
+                  <>
+                    <SizedBox height={20} />
+                    <LoadingIndicator />
+                    <SizedBox height={20} />
+                  </>
+                )
+              );
             }}
             ListEmptyComponent={() => {
               return (
