@@ -6,6 +6,7 @@ import { gql } from "apollo-boost";
 import LoadingIndicator from "../LoadingIndicator";
 import { useMutation } from "@apollo/react-hooks";
 import { useStoreState } from "easy-peasy";
+import { Alert, ToastAndroid } from "react-native";
 
 const CREATE_COMMENT = gql`
   mutation createComment($postId: ID!, $userId: ID!, $text: String!) {
@@ -34,7 +35,9 @@ function CommentInput({ postId }) {
 
   const [comment, setComment] = useState("");
   const doComment = () => {
-    createComment({ variables: { postId, userId: me, text: comment } });
+    if (comment.length > 0)
+      createComment({ variables: { postId, userId: me, text: comment } });
+    else Alert.alert("Cannot send empty comment", "Type something nice");
   };
 
   const loadingIcon = (style) =>

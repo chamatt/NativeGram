@@ -12,6 +12,8 @@ import CommentInput from "~/components//CommentInput";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import { SafeAreaView } from "~/components/SafeArea";
 import { uniqBy } from "lodash";
+import { Image } from "react-native";
+import EmptyList from "~/components/EmptyList";
 
 const FETCH_COMMENTS = gql`
   query fetchComments($postId: ID!, $offset: Int!) {
@@ -27,7 +29,9 @@ const FETCH_COMMENTS = gql`
         id
         username
         profile {
+          id
           avatar {
+            id
             url
           }
         }
@@ -126,11 +130,20 @@ const Comments = () => {
           ListFooterComponent={() => {
             return loading && <LoadingIndicator />;
           }}
+          ListEmptyComponent={() => {
+            return (
+              <EmptyList
+                text="No Comments Yet"
+                loading={loading}
+                refetch={refetch}
+              />
+            );
+          }}
           onEndReachedThreshold={0.5}
           onEndReached={() => {
             if (!notHasMore) {
               fetchMore({
-                variables: { offset: data?.comments?.length + 1 },
+                variables: { offset: data?.comments?.length },
                 updateQuery: (prev, { fetchMoreResult }) => {
                   if (
                     !fetchMoreResult ||

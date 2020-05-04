@@ -14,7 +14,7 @@ export const CategoryContainer = styled.View`
   align-items: center;
   width: 100%;
 `;
-export const CategoryItem = styled.View`
+export const CategoryItem = styled.TouchableOpacity`
   align-items: center;
   justify-content: center;
   padding: 0px 10px;

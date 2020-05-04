@@ -36,13 +36,20 @@ const CREATE_LIKE = gql`
     }
   }
 `;
+const DELETE_LIKE = gql`
+  mutation deleteLike($id: ID!) {
+    deleteLike(input: { where: { id: $id } }) {
+      like {
+        id
+      }
+    }
+  }
+`;
 
 const HAS_LIKED = gql`
   query isLiked($userId: ID!, $postId: ID!) {
-    likesConnection(where: { user: { id: $userId }, post: { id: $postId } }) {
-      aggregate {
-        count
-      }
+    userLikes: likes(where: { user: { id: $userId }, post: { id: $postId } }) {
+      id
     }
   }
 `;
@@ -54,6 +61,10 @@ const FETCH_POST = gql`
         count
       }
     }
+    userLikes: likes(where: { user: { id: $userId }, post: { id: $postId } }) {
+      id
+    }
+
     commentsConnection(where: { post: { id: $postId } }) {
       aggregate {
         count
@@ -74,7 +85,9 @@ const FETCH_POST = gql`
           id
           username
           profile {
+            id
             avatar {
+              id
               url
             }
           }
@@ -83,9 +96,11 @@ const FETCH_POST = gql`
       }
     }
     user(id: $userId) {
+      id
       profile {
         id
         avatar {
+          id
           url
         }
         name
@@ -111,13 +126,13 @@ const Post = ({
     post,
     user,
     likesCount,
+    likesLoading,
     commentsCount,
     userHasLiked,
     postLoading,
-    hasLikedLoading,
     postError,
-    hasLikedError,
     createLike,
+    deleteLike,
   } = usePost(userId, postId, amountComments);
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -177,7 +192,7 @@ const Post = ({
               );
             }}
             sliderWidth={wp("100%")}
-            itemWidth={wp("85%")}
+            itemWidth={wp("100%")}
           />
         </CarouselContainer>
       )}
@@ -194,18 +209,28 @@ const Post = ({
           type="like"
           amount={likesCount}
           active={userHasLiked}
-          onPress={() => createLike({ variables: { userId, postId } })}
+          loading={likesLoading}
+          onPress={() =>
+            userHasLiked
+              ? deleteLike({ variables: { userId, postId } })
+              : createLike({ variables: { userId, postId } })
+          }
         />
         <PostAction
           type="comment"
           amount={commentsCount}
-          onPress={() => alert("Comment")}
+          onPress={() => navigation.push("Comments", { postId })}
         />
       </PostActions>
       <Body>
         <Text>{post?.description}</Text>
-        <SizedBox height={20} />
-        <Text category="h6">Comments</Text>
+
+        {post?.comments?.length ? (
+          <>
+            <SizedBox height={20} />
+            <Text category="h6">Comments</Text>
+          </>
+        ) : null}
         {showInput && (
           <>
             <SizedBox height={20} />
@@ -228,9 +253,10 @@ const Post = ({
         </Layout>
         {showViewAllComments && (
           <>
-            <SizedBox height={20} />
+            {/* <SizedBox height={20} /> */}
             <Button
               size="tiny"
+              appearance="ghost"
               status="basic"
               onPress={() => navigation.push("Comments", { postId })}
             >
@@ -254,7 +280,6 @@ function usePost(userId, postId, amountComments) {
       userId,
     },
   });
-  const userHasLiked = hasLiked?.likesConnection?.aggregate?.count > 0;
 
   const {
     data: postData,
@@ -269,28 +294,64 @@ function usePost(userId, postId, amountComments) {
     },
   });
 
-  const [createLike, { data }] = useMutation(CREATE_LIKE, {
-    onCompleted: () => {
-      postRefetch();
-    },
-  });
+  const [createLikeMutation, { loading: createLikeLoading }] = useMutation(
+    CREATE_LIKE,
+    {
+      onCompleted: async () => {
+        await postRefetch();
+      },
+
+      refetchQueries: ["isLiked"],
+      awaitRefetchQueries: true,
+    }
+  );
+  const [deleteLikeMutation, { loading: deleteLikeLoading }] = useMutation(
+    DELETE_LIKE,
+    {
+      onCompleted: async () => {
+        await postRefetch();
+      },
+      refetchQueries: ["isLiked"],
+      awaitRefetchQueries: true,
+    }
+  );
 
   const likesCount = postData?.likesConnection?.aggregate?.count;
+  const userHasLiked = Boolean(postData?.userLikes?.length);
+  const userLikes = hasLiked?.userLikes;
   const commentsCount = postData?.commentsConnection?.aggregate?.count;
   const post = postData?.post;
   const user = postData?.user;
+  const likesLoading = createLikeLoading || deleteLikeLoading;
+
+  const deleteLike = () => {
+    if (!deleteLikeLoading && hasLiked?.userLikes?.length) {
+      deleteLikeMutation({
+        variables: {
+          id: hasLiked?.userLikes?.[0]?.id,
+        },
+      });
+    }
+  };
+  const createLike = (payload) => {
+    if (!createLikeLoading && !hasLiked?.userLikes?.length) {
+      createLikeMutation({
+        ...payload,
+      });
+    }
+  };
 
   return {
     post,
     user,
     likesCount,
+    likesLoading,
     commentsCount,
     userHasLiked,
     postLoading,
-    hasLikedLoading,
     postError,
-    hasLikedError,
     createLike,
+    deleteLike,
     postRefetch,
   };
 }

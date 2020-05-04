@@ -9,6 +9,7 @@ import {
 export const Container = styled(Layout)`
   align-items: center;
   flex: 1;
+  width: 100%;
 `;
 
 export const Body = styled(Layout)`

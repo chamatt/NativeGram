@@ -20,10 +20,7 @@ export default function PostThumbnail({
 }) {
   const navigation = useNavigation();
   return (
-    <Container
-      onPress={() => navigation.push("Post", { postId: id, userId: userId })}
-      {...rest}
-    >
+    <Container onPress={onSelect} {...rest}>
       <SharedElement key={id} id={`post.${id}.photo`}>
         <Thumbnail
           publicId={publicId}

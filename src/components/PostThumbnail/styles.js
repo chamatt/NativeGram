@@ -5,12 +5,14 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import cloudinary from "cloudinary-core";
+
 const cl = new cloudinary.Cloudinary({
   cloud_name: "matheusvicente",
 });
 
 export const Container = styled.TouchableOpacity`
   /* padding: ${wp("5%")}px; */
+  background-color: ${(props) => props.theme["background-basic-color-2"]}
 `;
 
 export const Thumbnail = styled.Image.attrs((props) => ({

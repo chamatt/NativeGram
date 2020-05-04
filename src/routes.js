@@ -1,6 +1,11 @@
 import React from "react";
+import styled from "styled-components/native";
 import { SafeAreaView, View } from "react-native";
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  useNavigation,
+  CommonActions,
+} from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   BottomNavigation,
@@ -9,6 +14,7 @@ import {
   TopNavigationAction,
   useTheme,
   Button,
+  Layout,
 } from "@ui-kitten/components";
 import {
   createStackNavigator,
@@ -25,10 +31,16 @@ import SettingsScreen from "~/pages/Settings";
 import { BottomSafeArea } from "~/components/SafeArea";
 import { useStoreState } from "easy-peasy";
 import EditProfile from "./pages/EditProfile";
+import EditProfileCamera from "~/pages/EditProfile/EditProfileCamera";
+import EditProfileEditor from "~/pages/EditProfile/EditProfileEditor";
 
 import CreatePostCamera from "~/pages/CreatePost/CreatePostCamera";
 import CreatePostEditor from "~/pages/CreatePost/CreatePostEditor";
 import CreatePostScreen from "~/pages/CreatePost/CreatePostScreen";
+import FollowRoute from "./pages/FollowPage";
+import SearchScreen from "./pages/Search";
+import ExploreScreen from "./pages/Explore";
+import EmptyList from "./components/EmptyList";
 
 const BottomTab = createBottomTabNavigator();
 const Auth = createStackNavigator();
@@ -36,9 +48,19 @@ const Root = createStackNavigator();
 const Profile = createSharedElementStackNavigator();
 const Post = createSharedElementStackNavigator();
 const CreatePost = createSharedElementStackNavigator();
+const Feed = createStackNavigator();
+const Explore = createSharedElementStackNavigator();
+
+const LogoTitle = styled.Text`
+  font-size: 24px;
+  font-family: RichardMurray;
+  color: ${(props) => props.theme["text-basic-color"]};
+`;
 
 const PersonIcon = (style) => <Icon {...style} name="person" />;
 const HomeIcon = (style) => <Icon {...style} name="home" />;
+const HeartIcon = (style) => <Icon {...style} name="heart-outline" />;
+const SearchIcon = (style) => <Icon {...style} name="search-outline" />;
 const CameraIcon = (style) => (
   <Icon {...style} style={{ width: 50 }} size={20} name="camera-outline" />
 );
@@ -47,6 +69,13 @@ const BottomTabBar = ({ navigation, state }) => {
   const onSelect = (index) => {
     navigation.navigate(state.routeNames[index]);
   };
+
+  const handleSecondPress = (index) => {
+    console.log(index);
+    if (navigation.canGoBack()) {
+      if (state.index === index) navigation.popToTop();
+    }
+  };
   return (
     <SafeAreaView>
       <BottomNavigation
@@ -54,9 +83,26 @@ const BottomTabBar = ({ navigation, state }) => {
         onSelect={onSelect}
         appearance="noIndicator"
       >
-        <BottomNavigationTab icon={HomeIcon} />
-        <BottomNavigationTab icon={CameraIcon} />
-        <BottomNavigationTab icon={PersonIcon} />
+        <BottomNavigationTab
+          icon={HomeIcon}
+          onPressOut={() => handleSecondPress(0)}
+        />
+        <BottomNavigationTab
+          icon={SearchIcon}
+          onPressOut={() => handleSecondPress(1)}
+        />
+        <BottomNavigationTab
+          icon={CameraIcon}
+          onPressOut={() => handleSecondPress(2)}
+        />
+        <BottomNavigationTab
+          icon={HeartIcon}
+          onPressOut={() => handleSecondPress(3)}
+        />
+        <BottomNavigationTab
+          icon={PersonIcon}
+          onPressOut={() => handleSecondPress(4)}
+        />
       </BottomNavigation>
     </SafeAreaView>
   );
@@ -71,8 +117,20 @@ const AuthStack = () => {
         headerTintColor: theme["text-basic-color"],
       }}
     >
-      <Auth.Screen name="SignIn" component={SignIn}></Auth.Screen>
-      <Auth.Screen name="SignUp" component={SignUp}></Auth.Screen>
+      <Auth.Screen
+        name="SignIn"
+        component={SignIn}
+        options={{
+          title: "Nativegram",
+          headerTitle: (props) => <LogoTitle {...props} />,
+          headerTitleAlign: "center",
+        }}
+      ></Auth.Screen>
+      <Auth.Screen
+        name="SignUp"
+        component={SignUp}
+        options={{ title: "Create Account" }}
+      ></Auth.Screen>
     </Auth.Navigator>
   );
 };
@@ -85,18 +143,91 @@ const TabNavigator = () => {
         tabBar={(props) => <BottomTabBar {...props} />}
         initialRouteName="UserProfile"
       >
-        <BottomTab.Screen name="Home" component={Home} />
+        <BottomTab.Screen name="FeedStack" component={FeedStack} />
+        <BottomTab.Screen name="Explore" component={ExploreStack} />
         <BottomTab.Screen
           name="CreatePost"
           component={CreatePostStack}
           options={{ tabBarVisible: false }}
         />
+        <BottomTab.Screen name="Notifications">
+          {(props) => (
+            <Layout style={{ flex: 1 }}>
+              <EmptyList {...props} text="Under Maintenance" />
+            </Layout>
+          )}
+        </BottomTab.Screen>
         <BottomTab.Screen name="UserProfile" component={ProfileStack} />
       </BottomTab.Navigator>
       <BottomSafeArea
         backgroundColor={theme["background-basic-color-1"]}
       ></BottomSafeArea>
     </>
+  );
+};
+
+const ProfileScreens = (Navigator) => {
+  const theme = useTheme();
+  return (
+    <>
+      <Navigator.Screen
+        name="Profile"
+        component={ProfileScreen}
+      ></Navigator.Screen>
+      <Navigator.Screen
+        name="EditProfile"
+        options={{ title: "Edit Profile" }}
+        component={EditProfile}
+      ></Navigator.Screen>
+      <Navigator.Screen
+        options={{
+          title: "",
+        }}
+        name="EditProfile/Camera"
+        component={EditProfileCamera}
+      ></Navigator.Screen>
+      <Navigator.Screen
+        options={{
+          title: "Editor",
+        }}
+        name="EditProfile/Editor"
+        component={EditProfileEditor}
+      ></Navigator.Screen>
+      <Navigator.Screen
+        name="Follow"
+        options={{
+          title: "User Followers",
+        }}
+        component={FollowRoute}
+      ></Navigator.Screen>
+    </>
+  );
+};
+
+const ExploreStack = () => {
+  const theme = useTheme();
+  const navigation = useNavigation();
+
+  return (
+    <Explore.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: theme["background-basic-color-1"] },
+        headerTintColor: theme["text-basic-color"],
+      }}
+    >
+      <Explore.Screen
+        options={{ headerShown: false }}
+        name="Explore"
+        component={ExploreScreen}
+      />
+      <Explore.Screen
+        options={{ headerShown: false }}
+        name="Search"
+        component={SearchScreen}
+      />
+      {ProfileScreens(Explore)}
+      {PostScreens(Explore)}
+    </Explore.Navigator>
   );
 };
 
@@ -113,29 +244,43 @@ const ProfileStack = () => {
         headerTintColor: theme["text-basic-color"],
       }}
     >
-      <Profile.Screen name="Profile" component={ProfileScreen}></Profile.Screen>
-      <Profile.Screen
-        name="EditProfile"
-        options={{ title: "Edit Profile" }}
-        component={EditProfile}
-      ></Profile.Screen>
-      {PostStack(Profile)}
+      {ProfileScreens(Profile)}
+      {PostScreens(Profile)}
     </Profile.Navigator>
   );
 };
 
-const PostStack = (Navigator) => {
+const FeedStack = () => {
+  const theme = useTheme();
+  const navigation = useNavigation();
+  return (
+    <Feed.Navigator
+      screenOptions={{
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        mode: "card",
+        headerStyle: { backgroundColor: theme["background-basic-color-1"] },
+        headerTintColor: theme["text-basic-color"],
+      }}
+    >
+      <Feed.Screen
+        name="Feed"
+        component={Home}
+        options={{
+          title: "Nativegram",
+          headerTitle: (props) => <LogoTitle {...props} />,
+          headerTitleAlign: "center",
+        }}
+      ></Feed.Screen>
+      {ProfileScreens(Feed)}
+      {PostScreens(Feed)}
+    </Feed.Navigator>
+  );
+};
+
+const PostScreens = (Navigator) => {
   const theme = useTheme();
 
   return (
-    // <Post.Navigator
-    //   screenOptions={{
-    //     cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-    //     mode: "card",
-    //     headerStyle: { backgroundColor: theme["background-basic-color-1"] },
-    //     headerTintColor: theme["text-basic-color"],
-    //   }}
-    // >
     <>
       <Navigator.Screen
         name="Post"
@@ -156,7 +301,6 @@ const PostStack = (Navigator) => {
         component={CommentScreen}
       ></Navigator.Screen>
     </>
-    // </Post.Navigator>
   );
 };
 
