@@ -25,49 +25,6 @@ const App = () => {
   const { themeType } = useEvaTheme();
 
   const theme = useTheme();
-
-  const [loadingFonts, setLoadingFonts] = useState(true);
-  // useEffect(() => {
-  //   const fetchFonts = async () => {
-  //     await Font.loadAsync({
-  //       RichardMurray: require("./assets/fonts/RichardMurray/RichardMurray.ttf"),
-  //     });
-  //     setLoadingFonts(false);
-  //   };
-  //   fetchFonts();
-  // }, []);
-
-  // if (loadingFonts) {
-  //   return <Layout style={{ flex: 1 }} />;
-  // }
-
-  return (
-    <ThemeProvider theme={theme}>
-      <StatusBar
-        backgroundColor={theme["background-basic-color-1"]}
-        barStyle={themeType === "light" ? "dark-content" : "light-content"}
-      />
-      <Layout style={{ flex: 1 }}>
-        <Routes />
-      </Layout>
-    </ThemeProvider>
-  );
-};
-
-const AppProvider = () => {
-  const evaTheme = useEvaTheme();
-
-  return (
-    <>
-      <IconRegistry icons={EvaIconsPack} />
-      <ApplicationProvider {...eva} theme={evaTheme.currentTheme}>
-        <App />
-      </ApplicationProvider>
-    </>
-  );
-};
-
-export default () => {
   const [isAppReady, setIsAppReady] = useState(false);
   const [isSplashReady, setIsSplashReady] = useState(false);
 
@@ -109,7 +66,14 @@ export default () => {
   }
   if (!isAppReady) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme["background-basic-color-1"],
+        }}
+      >
         <Image
           style={{ width: 100, height: 100 }}
           source={require("~/assets/img/logo.png")}
@@ -119,6 +83,33 @@ export default () => {
     );
   }
 
+  return (
+    <ThemeProvider theme={theme}>
+      <StatusBar
+        backgroundColor={theme["background-basic-color-1"]}
+        barStyle={themeType === "light" ? "dark-content" : "light-content"}
+      />
+      <Layout style={{ flex: 1 }}>
+        <Routes />
+      </Layout>
+    </ThemeProvider>
+  );
+};
+
+const AppProvider = () => {
+  const evaTheme = useEvaTheme();
+
+  return (
+    <>
+      <IconRegistry icons={EvaIconsPack} />
+      <ApplicationProvider {...eva} theme={evaTheme.currentTheme}>
+        <App />
+      </ApplicationProvider>
+    </>
+  );
+};
+
+export default () => {
   return (
     <ApolloProvider client={client}>
       <StoreProvider store={store}>
