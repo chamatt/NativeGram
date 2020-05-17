@@ -67,7 +67,7 @@ A Full Stack Photo-Sharing App, built with React Native + Expo + GraphQL
 
 To see the **back-end API**, built with Strapi CMS, click here: [NativeGram-Backend](https://github.com/chamatt/NativeGram-Backend)<br />
 
-## Screenshots
+## 📸 Screenshots
 
 A few screenshots from parts of the app:
 
