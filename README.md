@@ -6,6 +6,8 @@
   A social photo sharing app, built with React Native (Instagram Clone)
 </h3>
 
+![](NativeGram.png)
+
 <p align="center">
   <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/chamatt/NativeGram?color=7159c1">
 
@@ -21,6 +23,7 @@
     <img alt="Repository issues" src="https://img.shields.io/github/issues/chamatt/NativeGram?color=7159c1">
   </a>
 
+  <img alt="GitHub" src="https://img.shields.io/github/license/chamatt/chamatt/NativeGram?color=7159c1">
 </p>
 
 
