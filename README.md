@@ -29,6 +29,7 @@
 
 <p align="center">
   <a href="#-about-the-project">About the project</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+  <a href="#-screenshots">Screenshots</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="#-technologies">Technologies</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="#-getting-started">Getting started</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
   <a href="#-license">License</a>
@@ -65,6 +66,14 @@ A Full Stack Photo-Sharing App, built with React Native + Expo + GraphQL
 [✖] Notifications
 
 To see the **back-end API**, built with Strapi CMS, click here: [NativeGram-Backend](https://github.com/chamatt/NativeGram-Backend)<br />
+
+## Screenshots
+
+A few screenshots from parts of the app:
+
+| Login | Feed  | Camera | Profile | 
+|-------|-------|--------|---------|
+| ![](screenshots/login.png) | ![](screenshots/feed.png) | ![](screenshots/camera.png)  | ![](screenshots/profile.png)   | 
 
 ## 🚀 Technologies
 
