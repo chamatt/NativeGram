@@ -6,3 +6,13 @@ export const Container = styled(Layout)`
   justify-content: center;
   padding: 20px;
 `;
+
+export const LogoContainer = styled.View`
+  align-items: center;
+`;
+export const LogoText = styled.Text`
+  font-size: 60px;
+  padding-top: 20px;
+  font-family: RichardMurray;
+  color: ${(props) => props.theme["text-basic-color"]};
+`;

@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from "react";
-import { Layout, Text, Avatar, Button } from "@ui-kitten/components";
+import React, { useEffect, useRef, useState } from "react";
+import { Layout, Text, Avatar, Button, useTheme } from "@ui-kitten/components";
 import { useStoreActions, useStoreState } from "easy-peasy";
 import { gql } from "apollo-boost";
-import { useQuery } from "@apollo/react-hooks";
-import { useRoute } from "@react-navigation/native";
-import Carousel from "react-native-snap-carousel";
+import { useQuery, useMutation } from "@apollo/react-hooks";
+import { useRoute, useNavigation } from "@react-navigation/native";
+import Carousel, { Pagination } from "react-native-snap-carousel";
 import { Image, Dimensions } from "react-native";
 import { LoadingPage } from "~/components/LoadingIndicator";
 import {
@@ -14,27 +14,58 @@ import {
   Header,
   CarouselContainer,
   PostActions,
+  PostImagePlaceholder,
 } from "./styles";
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import PostAction from "../PostAction";
-import SizedBox from "../SizedBox";
+import PostAction from "~/components/PostAction";
+import SizedBox from "~/components/SizedBox";
+import CommentItem from "~/components/CommentItem";
+import { defaultAvatar } from "~/constants/";
+import CommentInput from "~/components/CommentInput";
+import { SharedElement } from "react-navigation-shared-element";
 
-const HAS_LIKED = gql`
-  query isLiked($userId: ID!, $postId: ID!) {
-    likesConnection(where: { user: { id: $userId }, post: { id: $postId } }) {
-      aggregate {
-        count
+const CREATE_LIKE = gql`
+  mutation createLike($userId: ID!, $postId: ID!) {
+    createLike(input: { data: { user: $userId, post: $postId } }) {
+      like {
+        id
+      }
+    }
+  }
+`;
+const DELETE_LIKE = gql`
+  mutation deleteLike($id: ID!) {
+    deleteLike(input: { where: { id: $id } }) {
+      like {
+        id
       }
     }
   }
 `;
 
+const HAS_LIKED = gql`
+  query isLiked($userId: ID!, $postId: ID!) {
+    userLikes: likes(where: { user: { id: $userId }, post: { id: $postId } }) {
+      id
+    }
+  }
+`;
+
 const FETCH_POST = gql`
-  query getPost($postId: ID!, $userId: ID!) {
+  query fetchPost($postId: ID!, $userId: ID!, $amountComments: Int) {
     likesConnection(where: { post: { id: $postId } }) {
+      aggregate {
+        count
+      }
+    }
+    userLikes: likes(where: { user: { id: $userId }, post: { id: $postId } }) {
+      id
+    }
+
+    commentsConnection(where: { post: { id: $postId } }) {
       aggregate {
         count
       }
@@ -43,12 +74,33 @@ const FETCH_POST = gql`
       id
       description
       images {
+        id
         url
+        provider_metadata
+      }
+      comments(limit: $amountComments, sort: "createdAt:desc") {
+        id
+        createdAt
+        user {
+          id
+          username
+          profile {
+            id
+            avatar {
+              id
+              url
+            }
+          }
+        }
+        text
       }
     }
     user(id: $userId) {
+      id
       profile {
+        id
         avatar {
+          id
           url
         }
         name
@@ -58,61 +110,166 @@ const FETCH_POST = gql`
 `;
 const WIDTH = Dimensions.get("screen").width;
 
-const Post = ({ userId, postId }) => {
+const Post = ({
+  userId,
+  postId,
+  showInput = false,
+  showViewAllComments = true,
+  amountComments = 3,
+}) => {
   const route = useRoute();
+  const navigation = useNavigation();
   const carouselRef = useRef();
+  const commentInputRef = useRef();
+  const theme = useTheme();
   const {
     post,
     user,
-    likes,
+    likesCount,
+    likesLoading,
+    commentsCount,
     userHasLiked,
     postLoading,
-    hasLikedLoading,
     postError,
-    hasLikedError,
-  } = usePost(userId, postId);
+    createLike,
+    deleteLike,
+  } = usePost(userId, postId, amountComments);
 
-  if (postLoading || hasLikedLoading) return <LoadingPage />;
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  // if (postLoading || hasLikedLoading) return <LoadingPage />;
   return (
     <Container>
-      <Header>
-        <Avatar source={{ uri: user?.profile?.avatar?.url }}></Avatar>
+      <Header
+        onPress={() =>
+          navigation.push("Profile", {
+            userId,
+          })
+        }
+      >
+        <Avatar
+          source={
+            user?.profile?.avatar?.url
+              ? { uri: user?.profile?.avatar?.url }
+              : defaultAvatar
+          }
+        ></Avatar>
         <SizedBox width={10} />
         <Text category="s1">{user?.profile?.name || user?.username}</Text>
       </Header>
-      <CarouselContainer>
-        <Carousel
-          ref={carouselRef}
-          data={post?.images}
-          layout="default"
-          renderItem={({ item }) => {
-            return <PostImage source={{ uri: item?.url }} resizeMode="cover" />;
-          }}
-          sliderWidth={wp("85%")}
-          itemWidth={wp("85%")}
-        />
-      </CarouselContainer>
+
+      {postLoading && (
+        <CarouselContainer>
+          <SharedElement id={`post.${postId}.photo`}>
+            <PostImagePlaceholder />
+          </SharedElement>
+        </CarouselContainer>
+      )}
+      {!postLoading && post?.images && (
+        <CarouselContainer>
+          <Carousel
+            removeClippedSubviews={false}
+            onSnapToItem={(index) => setSelectedIndex(index)}
+            ref={carouselRef}
+            data={post?.images}
+            layout="default"
+            renderItem={({ item }) => {
+              if (item?.url === post?.images?.[0]?.url) {
+                return (
+                  <SharedElement id={`post.${postId}.photo`}>
+                    <PostImage
+                      publicId={item?.provider_metadata?.public_id}
+                      resizeMode="cover"
+                    />
+                  </SharedElement>
+                );
+              }
+              return (
+                <PostImage
+                  publicId={item?.provider_metadata?.public_id}
+                  resizeMode="cover"
+                />
+              );
+            }}
+            sliderWidth={wp("100%")}
+            itemWidth={wp("100%")}
+          />
+        </CarouselContainer>
+      )}
+      <Pagination
+        dotsLength={post?.images?.length || 0}
+        activeDotIndex={selectedIndex}
+        containerStyle={{ paddingBottom: 0, paddingTop: 20 }}
+        dotStyle={{
+          backgroundColor: theme["text-primary-color"],
+        }}
+      />
       <PostActions>
         <PostAction
           type="like"
-          amount={likes}
+          amount={likesCount}
           active={userHasLiked}
-          onPress={() => alert("Like")}
+          loading={likesLoading}
+          onPress={() =>
+            userHasLiked
+              ? deleteLike({ variables: { userId, postId } })
+              : createLike({ variables: { userId, postId } })
+          }
         />
-        <PostAction type="comment" onPress={() => alert("Comment")} />
+        <PostAction
+          type="comment"
+          amount={commentsCount}
+          onPress={() => navigation.push("Comments", { postId })}
+        />
       </PostActions>
       <Body>
         <Text>{post?.description}</Text>
+
+        {post?.comments?.length ? (
+          <>
+            <SizedBox height={20} />
+            <Text category="h6">Comments</Text>
+          </>
+        ) : null}
+        {showInput && (
+          <>
+            <SizedBox height={20} />
+            <CommentInput postId={postId}></CommentInput>
+          </>
+        )}
         <SizedBox height={20} />
-        <Button size="small" appearance="outline">
-          Show Comments
-        </Button>
+        <Layout>
+          {post?.comments?.map((comment) => (
+            <CommentItem
+              userId={comment?.user?.id}
+              id={comment?.id}
+              key={comment?.id}
+              avatar={comment?.user?.profile?.avatar?.url}
+              author={comment?.user?.username}
+              body={comment?.text}
+              date={comment?.createdAt}
+            ></CommentItem>
+          ))}
+        </Layout>
+        {showViewAllComments && (
+          <>
+            {/* <SizedBox height={20} /> */}
+            <Button
+              size="tiny"
+              appearance="ghost"
+              status="basic"
+              onPress={() => navigation.push("Comments", { postId })}
+            >
+              View All Comments
+            </Button>
+          </>
+        )}
       </Body>
     </Container>
   );
 };
 
-function usePost(userId, postId) {
+function usePost(userId, postId, amountComments) {
   const {
     data: hasLiked,
     loading: hasLikedLoading,
@@ -123,30 +280,79 @@ function usePost(userId, postId) {
       userId,
     },
   });
-  const userHasLiked = hasLiked?.likesConnection?.aggregate?.count > 0;
 
-  const { data: postData, loading: postLoading, error: postError } = useQuery(
-    FETCH_POST,
+  const {
+    data: postData,
+    loading: postLoading,
+    error: postError,
+    refetch: postRefetch,
+  } = useQuery(FETCH_POST, {
+    variables: {
+      postId,
+      userId,
+      amountComments,
+    },
+  });
+
+  const [createLikeMutation, { loading: createLikeLoading }] = useMutation(
+    CREATE_LIKE,
     {
-      variables: {
-        postId,
-        userId,
+      onCompleted: async () => {
+        await postRefetch();
       },
+
+      refetchQueries: ["isLiked"],
+      awaitRefetchQueries: true,
     }
   );
-  const likes = postData?.likesConnection?.aggregate?.count;
+  const [deleteLikeMutation, { loading: deleteLikeLoading }] = useMutation(
+    DELETE_LIKE,
+    {
+      onCompleted: async () => {
+        await postRefetch();
+      },
+      refetchQueries: ["isLiked"],
+      awaitRefetchQueries: true,
+    }
+  );
+
+  const likesCount = postData?.likesConnection?.aggregate?.count;
+  const userHasLiked = Boolean(postData?.userLikes?.length);
+  const userLikes = hasLiked?.userLikes;
+  const commentsCount = postData?.commentsConnection?.aggregate?.count;
   const post = postData?.post;
   const user = postData?.user;
+  const likesLoading = createLikeLoading || deleteLikeLoading;
+
+  const deleteLike = () => {
+    if (!deleteLikeLoading && hasLiked?.userLikes?.length) {
+      deleteLikeMutation({
+        variables: {
+          id: hasLiked?.userLikes?.[0]?.id,
+        },
+      });
+    }
+  };
+  const createLike = (payload) => {
+    if (!createLikeLoading && !hasLiked?.userLikes?.length) {
+      createLikeMutation({
+        ...payload,
+      });
+    }
+  };
 
   return {
     post,
     user,
-    likes,
+    likesCount,
+    likesLoading,
+    commentsCount,
     userHasLiked,
     postLoading,
-    hasLikedLoading,
     postError,
-    hasLikedError,
+    createLike,
+    deleteLike,
+    postRefetch,
   };
 }
 

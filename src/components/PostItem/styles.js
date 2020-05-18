@@ -5,16 +5,21 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import cloudinary from "cloudinary-core";
+const cl = new cloudinary.Cloudinary({
+  cloud_name: "matheusvicente",
+});
 
 export const Container = styled(Layout)`
-  width: ${wp("90%")}px;
-  border-radius: ${wp("5%")}px;
+  /* width: ${wp("90%")}px; */
+  width: 100%;
+  /* border-radius: 15px; */
 `;
 
 export const Header = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;
-  padding: ${wp("5%")}px;
+  padding: 20px 20px;
 `;
 
 export const Body = styled(Layout)`
@@ -22,12 +27,25 @@ export const Body = styled(Layout)`
   padding-bottom: 20px;
   border-radius: ${wp("3%")}px;
 `;
-
-export const PostImage = styled.Image.attrs({ resizeMode: "cover" })`
-  width: ${wp("85%")}px;
-  height: ${wp("85%")}px;
-
-  border-radius: ${wp("3%")}px;
+export const PostImagePlaceholder = styled.View`
+  width: ${wp("100%")}px;
+  height: ${wp("100%")}px;
+  background: black;
+`;
+export const PostImage = styled.Image.attrs((props) => ({
+  resizeMode: "cover",
+  source: {
+    uri: cl.url(props.publicId, {
+      width: 600,
+      height: 600,
+      gravity: "faces",
+      crop: "fill",
+    }),
+  },
+}))`
+  width: ${wp("100%")}px; 
+  height: ${wp("100%")}px;
+  /* border-radius: 10px; */
 
   /* border-top-right-radius: ${wp("3%")}px;
   border-top-left-radius: ${wp("3%")}px; */

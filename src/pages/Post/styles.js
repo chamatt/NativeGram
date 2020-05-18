@@ -8,7 +8,7 @@ import {
 
 export const Container = styled(Layout).attrs({ level: "3" })`
   align-items: center;
-  padding: 20px;
+  /* padding: 20px; */
 `;
 
 export const Body = styled(Layout)`

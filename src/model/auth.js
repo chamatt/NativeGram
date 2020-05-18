@@ -1,4 +1,4 @@
-import { thunk, action } from "easy-peasy";
+import { thunk, action, thunkOn } from "easy-peasy";
 import { AsyncStorage, Alert } from "react-native";
 import api from "~/services/api";
 
@@ -6,7 +6,7 @@ const INITIAL_STATE = {
   user: null,
   token: null,
   signed: false,
-  loading: false
+  loading: false,
 };
 
 export default {
@@ -19,20 +19,21 @@ export default {
     actions.setLoading(true);
     try {
       const { email, password } = payload;
+      console.log("auth", api.defaults.headers.common["Authorization"]);
 
       const response = await api.post("auth/local", {
         identifier: email,
-        password
+        password,
       });
 
       const { jwt, user } = response.data;
 
-      //   console?.tron?.log(jwt, user);
-
       await AsyncStorage.setItem("@nativegram/token", jwt);
       actions.signInSuccess({ jwt, user });
+      api.defaults.headers.common["Authorization"] = `Bearer ${jwt}`;
       actions.setLoading(false);
     } catch (err) {
+      console.warn(err.response.data);
       const message = err?.response?.data?.data?.[0]?.messages?.[0]?.message;
 
       Alert.alert(
@@ -55,7 +56,7 @@ export default {
       const response = await api.post("auth/local/register", {
         username,
         email,
-        password
+        password,
       });
 
       actions.signInRequest({ email, password });
@@ -71,14 +72,37 @@ export default {
     }
   }),
   signOut: thunk(async (actions, payload, { getState }) => {
-    // await AsyncStorage.removeItem("@nativegram/token");
-    actions.signOutSuccess();
-    console.log(getState());
+    try {
+      await AsyncStorage.removeItem("@nativegram/token");
+      const token = await AsyncStorage.removeItem("@nativegram/token");
+      actions.signOutSuccess();
+      delete api.defaults.headers.common["Authorization"];
+
+      console.log(
+        "SignOut",
+        api.defaults.headers.common["Authorization"],
+        token
+      );
+    } catch (err) {
+      console.log(err);
+    }
   }),
-  signOutSuccess: action(state => {
+
+  onAddTodo: thunkOn(
+    (actions) => "persist/REHYDRATE",
+    async (actions, target) => {
+      if (target?.payload?.auth?.token) {
+        api.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${target.payload.auth.token}`;
+      }
+    }
+  ),
+
+  signOutSuccess: action((state) => {
     state.user = null;
     state.token = null;
     state.signed = false;
     state.loading = false;
-  })
+  }),
 };
